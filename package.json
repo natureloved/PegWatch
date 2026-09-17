@@ -1,0 +1,34 @@
+{
+  "name": "pegwatch",
+  "version": "1.0.0",
+  "description": "PegWatch: Autonomous Risk Agent for Tokenized Equities on Base",
+  "main": "backend/src/server.ts",
+  "scripts": {
+    "smoke:price": "tsx scripts/smoke/smoke-price.ts",
+    "smoke:flash": "tsx scripts/smoke/smoke-flash-quote.ts",
+    "smoke:wallet": "tsx scripts/smoke/smoke-wallet.ts",
+    "smoke:llm": "tsx scripts/smoke/smoke-llm.ts",
+    "smoke:all": "tsx scripts/smoke/smoke-price.ts && tsx scripts/smoke/smoke-flash-quote.ts && tsx scripts/smoke/smoke-wallet.ts && tsx scripts/smoke/smoke-llm.ts",
+    "dev:server": "tsx backend/src/server.ts",
+    "dev:agent": "tsx backend/src/agent.ts",
+    "dev:ui": "npm --prefix frontend run dev",
+    "build:ui": "npm --prefix frontend run build"
+  },
+  "keywords": ["ai-agent", "base", "tokenized-equities", "definitive-flash", "dynamic", "bankr"],
+  "author": "RastaDev",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "viem": "^2.23.0",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/node": "^22.13.0",
+    "tsx": "^4.19.3",
+    "typescript": "^5.7.3"
+  }
+}
