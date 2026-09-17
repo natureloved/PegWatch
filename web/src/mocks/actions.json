@@ -1,0 +1,36 @@
+[
+  {
+    "id": "act-flash-0918-0421",
+    "ts": 1789472400,
+    "deviationPct": -5.32,
+    "regime": "WEEKEND",
+    "classification": "ABNORMAL",
+    "decision": "De-risk 0.05 NVDAc → USDC via Flash Stop-Loss",
+    "reason": "Aerodrome NVDAc/USDC pool drifted −5.32% below Friday close ($216.00) while the Chainlink equity oracle has remained frozen for 58.4 hours. Confirmed abnormal dark-market liquidity breach across 2 consecutive evaluations; executing protective stop-loss to defend delegated portfolio margin.",
+    "orderId": "flash_order_0918_b20_nvda_99a",
+    "txHash": "0x4b791e23f993d0c2c1a409f5820bbda31862140df0353c7c645e59b2075f842a",
+    "status": "EXECUTED"
+  },
+  {
+    "id": "act-flash-0918-0435",
+    "ts": 1789473300,
+    "deviationPct": -5.48,
+    "regime": "WEEKEND",
+    "classification": "ABNORMAL",
+    "decision": "De-risk request suppressed by safety guardrail",
+    "reason": "Deviation remained at −5.48%, but action was halted by the portfolio cooldown policy (16 minutes remaining in active 30-minute interval). Agent maintained defensive limits without over-trading illiquid weekend orderbooks.",
+    "status": "HALTED_LIMITS"
+  },
+  {
+    "id": "act-flash-0917-2104",
+    "ts": 1789423440,
+    "deviationPct": -3.85,
+    "regime": "OVERNIGHT",
+    "classification": "ABNORMAL",
+    "decision": "De-risk 0.02 NVDAc → USDC via Flash Stop-Loss",
+    "reason": "Overnight session breach: Aerodrome pool deviated −3.85% against the $216.00 fair value benchmark, exceeding the ±2.0% overnight band for 2 consecutive cycles. Placed automated bracket de-risk order on Base.",
+    "orderId": "flash_order_0917_ovn_74f",
+    "txHash": "0x185b904921c8c951229942781bd702503e52e47982abe40ac01df89d7e7f6e02",
+    "status": "EXECUTED"
+  }
+]

@@ -1,0 +1,12 @@
+{
+  "regime": "WEEKEND",
+  "feedFrozen": true,
+  "feedUpdatedAt": 1789423200,
+  "dexPrice": 208.51,
+  "fairValue": 216.00,
+  "deviationPct": -3.47,
+  "thresholdPct": 5.0,
+  "classification": "NORMAL",
+  "breaches": 0,
+  "requiredBreaches": 2
+}

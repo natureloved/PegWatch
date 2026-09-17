@@ -109,10 +109,59 @@ npm run smoke:llm     # Tests Bankr LLM Gateway completion
 # Terminal 1: Backend Agent & API Server (Port 3005)
 npm run dev:server
 
-# Terminal 2: Vite React HUD Dashboard (Port 5173)
-npm run dev:ui
+# Terminal 2: Mission Control Dashboard (web/ - Port 5174)
+npm run dev:web
 ```
-Open **`http://localhost:5173`** in your browser to interact with the live dashboard!
+Open **`http://localhost:5174`** in your browser for the dedicated **Mission Control Dashboard**!
+
+---
+
+## PegWatch Control Dashboard (`web/`)
+
+The `web/` directory contains the Bloomberg-meets-modern-fintech Mission Control Dashboard designed for the 3-minute hackathon demo video.
+
+### Running the Dashboard
+```bash
+# From project root
+npm run dev:web
+
+# Or directly in web/
+cd web
+npm install
+npm run dev
+```
+
+### How Mocks Work
+The dashboard supports standalone presentation mode with seeded mock contracts in `web/src/mocks/`:
+- `web/src/mocks/status.json`: Models a dark-market weekend state with an oracle frozen for 61 hours (`regime: "WEEKEND"`, `feedFrozen: true`, `thresholdPct: 5.0`).
+- `web/src/mocks/actions.json`: Seeded with historical de-risk stop-loss orders, real BaseScan explorer links, and plain-English LLM rationales from Bankr.
+- `web/src/mocks/policy.json`: The active Dynamic delegation grant ($500 max action, 30 min cooldown, ±3% weekday / ±5% weekend).
+- **10s Motion Polling**: Gently simulates live market ticks via random-walk jitter.
+
+### Switching Between Mock Mode and Live Agent API
+- **Mock Mode (Default for Demo Video Recording)**: Set `VITE_MOCK=true` (or leave default in `.env`).
+- **Live Agent API Mode**:
+  Create `web/.env.local` or launch with:
+  ```bash
+  VITE_MOCK=false
+  VITE_API_URL=http://localhost:3005/api
+  ```
+  The dashboard will immediately switch from static mock files to live real-time state, polling the active Node.js agent and Base contract reads on `http://localhost:3005/api/status`.
+
+### Demo Choreography Guide (Demo Controls Drawer)
+1. **Initial Ambient State**: The unmissable violet `WEEKEND — DARK MARKET` pill pulses with `"Oracle frozen (~61h) · agent active"`.
+2. **Breach Escalation Sequence**:
+   - Open the **Demo Controls** drawer (bottom-left) and click **Arm Now (Demo)** (or slide deviation past -5.0%).
+   - The top banner alerts: `SIMULATED DRIFT — live market data, injected deviation`.
+   - The semicircular needle smoothly eases to `-5.35%` with overshoot.
+   - Gauge border pulses amber: `Breach 1/2 — confirming…`.
+   - 2 seconds later, breach 2 confirms: Gauge flashes red (`ABNORMAL DRIFT TRIGGERED`).
+   - 1.2 seconds later, Flash stop-loss executes: A new audit row animates into the ledger with green `EXECUTED` pill, Flash order ID, clickable BaseScan tx link, and plain-English LLM rationale. An execution pin drops onto the 24h rolling sparkline!
+3. **Revoke Signing Rights**:
+   - Click **Revoke Access** in the top header.
+   - The confirmation modal details the removed signing rights and requires typing **`REVOKE`** to confirm.
+   - Dashboard shifts to a muted "agent standing down" state, and the Policy Panel displays `DELEGATION REVOKED`.
+   - Click **Restore Delegation** to reset for another run.
 
 ---
 

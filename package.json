@@ -12,7 +12,9 @@
     "dev:server": "tsx backend/src/server.ts",
     "dev:agent": "tsx backend/src/agent.ts",
     "dev:ui": "npm --prefix frontend run dev",
-    "build:ui": "npm --prefix frontend run build"
+    "build:ui": "npm --prefix frontend run build",
+    "dev:web": "npm --prefix web run dev",
+    "build:web": "npm --prefix web run build"
   },
   "keywords": [
     "ai-agent",
