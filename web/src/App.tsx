@@ -4,11 +4,15 @@ import initialStatus from './mocks/status.json';
 import initialActions from './mocks/actions.json';
 import initialPolicy from './mocks/policy.json';
 
+import { LiveTickerBar } from './components/LiveTickerBar';
 import { HeaderBar } from './components/HeaderBar';
+import { LandingPage } from './components/LandingPage';
 import { DeviationGauge } from './components/DeviationGauge';
+import { FlashTerminal } from './components/FlashTerminal';
+import { AiRiskCopilot } from './components/AiRiskCopilot';
+import { PolicyPanel } from './components/PolicyPanel';
 import { DeviationChart } from './components/DeviationChart';
 import { ActionsLedger } from './components/ActionsLedger';
-import { PolicyPanel } from './components/PolicyPanel';
 import { RevokeModal } from './components/RevokeModal';
 import { DemoControls } from './components/DemoControls';
 import { SimulatedBanner } from './components/SimulatedBanner';
@@ -17,6 +21,7 @@ const IS_MOCK = import.meta.env.VITE_MOCK !== 'false';
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3005/api';
 
 export function App() {
+  const [viewMode, setViewMode] = useState<'landing' | 'terminal'>('terminal');
   const [status, setStatus] = useState<Status>(initialStatus as Status);
   const [actions, setActions] = useState<Action[]>(initialActions as Action[]);
   const [policy, setPolicy] = useState<Policy>(initialPolicy as Policy);
@@ -141,7 +146,7 @@ export function App() {
           decision: 'De-risk 0.05 NVDAc → USDC via Flash Stop-Loss',
           reason: `Aerodrome NVDAc/USDC pool drifted −5.48% below Friday close ($${status.fairValue.toFixed(
             2
-          )}) while the Chainlink equity oracle has remained frozen for 61.2 hours. Confirmed abnormal dark-market liquidity breach across 2 consecutive evaluations; executing protective stop-loss to defend delegated portfolio margin.`,
+          )}) while the Chainlink equity oracle has remained frozen for 85.2 hours. Confirmed abnormal dark-market liquidity breach across 2 consecutive evaluations; executing protective stop-loss to defend portfolio margin.`,
           orderId: newOrderId,
           txHash: newTxHash,
           status: 'EXECUTED',
@@ -185,10 +190,18 @@ export function App() {
     setIsSimulated(false);
     setStatus((prev) => ({
       ...prev,
-      deviationPct: -3.47,
-      dexPrice: 208.51,
+      deviationPct: -3.71,
+      dexPrice: 207.99,
       classification: 'NORMAL',
       breaches: 0,
+    }));
+  };
+
+  // Dynamic Trigger Band Ratchet from Flash Terminal
+  const handleBandRatchet = (delta: number) => {
+    setStatus((prev) => ({
+      ...prev,
+      thresholdPct: Math.max(1.0, Math.min(10.0, prev.thresholdPct + delta)),
     }));
   };
 
@@ -209,66 +222,109 @@ export function App() {
         isStandingDown ? 'opacity-70' : 'opacity-100'
       }`}
     >
-      {/* 1. Honest Simulated Drift Banner */}
-      <SimulatedBanner
-        active={isSimulated}
-        driftPct={status.deviationPct}
-        onReset={handleReset}
+      {/* 1. Multi-Asset Ticker Marquee Bar */}
+      <LiveTickerBar
+        primaryDeviation={status.deviationPct}
+        primaryDexPrice={status.dexPrice}
       />
 
-      {/* 2. Top Header Bar */}
+      {/* 2. Top Navigation Bar */}
       <HeaderBar
         status={status}
         policy={policy}
+        viewMode={viewMode}
+        onChangeViewMode={setViewMode}
         onOpenRevokeModal={() => setIsRevokeModalOpen(true)}
         onRestoreDelegation={handleRestoreDelegation}
       />
 
-      {/* 3. Main Dashboard Layout */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
-        {/* Top Section: Hero Gauge (left 65%) + Policy Contract (right 35%) */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          {/* Hero: Deviation Gauge (~40% of viewport visual prominence) */}
-          <div className="lg:col-span-8">
-            <DeviationGauge status={status} />
-          </div>
-
-          {/* Policy Panel (right sidebar desktop, bottom mobile) */}
-          <div className="lg:col-span-4 h-full">
-            <PolicyPanel
-              policy={policy}
-              onOpenRevokeModal={() => setIsRevokeModalOpen(true)}
-              onRestoreDelegation={handleRestoreDelegation}
-            />
-          </div>
-        </div>
-
-        {/* Rolling 24h Deviation Sparkline */}
-        <DeviationChart
-          data={chartData}
-          thresholdPct={status.thresholdPct}
-          actions={actions}
+      {/* VIEW A: LANDING PAGE */}
+      {viewMode === 'landing' ? (
+        <LandingPage
+          onLaunchApp={() => setViewMode('terminal')}
+          primaryDeviation={status.deviationPct}
+          primaryDexPrice={status.dexPrice}
         />
+      ) : (
+        /* VIEW B: MISSION CONTROL TERMINAL */
+        <>
+          {/* Honest Simulated Drift Banner */}
+          <SimulatedBanner
+            active={isSimulated}
+            driftPct={status.deviationPct}
+            onReset={handleReset}
+          />
 
-        {/* Agent Actions Audit Ledger */}
-        <ActionsLedger actions={actions} />
-      </main>
+          {/* Main Dashboard Layout */}
+          <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+            {/* Top Grid: Hero Deviation Gauge (Left) + Definitive Flash & Delegation Cards (Right) */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+              {/* Left Column: Dominant Semicircular HUD Gauge */}
+              <div className="lg:col-span-7">
+                <DeviationGauge status={status} />
+              </div>
 
-      {/* Revocation Confirmation Modal */}
-      <RevokeModal
-        isOpen={isRevokeModalOpen}
-        onClose={() => setIsRevokeModalOpen(false)}
-        onConfirm={handleConfirmRevoke}
-        delegatedWallet={policy.delegatedWallet}
-      />
+              {/* Right Column: Flash Execution Rail & Delegation Mandate */}
+              <div className="lg:col-span-5 space-y-4">
+                <FlashTerminal
+                  currentPrice={status.dexPrice}
+                  benchmarkPrice={status.fairValue}
+                  activeThresholdPct={status.thresholdPct}
+                  isDelegated={policy.delegated}
+                  onAdjustBand={handleBandRatchet}
+                />
 
-      {/* Collapsible Demo Controls (Bottom-Left) */}
-      <DemoControls
-        isSimulated={isSimulated}
-        onInjectDrift={handleInjectDrift}
-        onArmNow={handleArmNow}
-        onReset={handleReset}
-      />
+                <PolicyPanel
+                  policy={policy}
+                  onOpenRevokeModal={() => setIsRevokeModalOpen(true)}
+                  onRestoreDelegation={handleRestoreDelegation}
+                />
+              </div>
+            </div>
+
+            {/* Mid Section: AI Risk Copilot Stream + 24h Rolling Deviation Chart */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+              <div className="lg:col-span-5">
+                <AiRiskCopilot
+                  deviationPct={status.deviationPct}
+                  regime={status.regime}
+                  isFeedFrozen={status.feedFrozen}
+                  dexPrice={status.dexPrice}
+                  fairValue={status.fairValue}
+                  latestActionReason={actions[0]?.reason}
+                />
+              </div>
+
+              <div className="lg:col-span-7">
+                <DeviationChart
+                  data={chartData}
+                  thresholdPct={status.thresholdPct}
+                  actions={actions}
+                />
+              </div>
+            </div>
+
+            {/* Bottom Section: Full Agent Audit Trail Ledger */}
+            <ActionsLedger actions={actions} />
+          </main>
+
+          {/* Revocation Confirmation Modal */}
+          <RevokeModal
+            isOpen={isRevokeModalOpen}
+            onClose={() => setIsRevokeModalOpen(false)}
+            onConfirm={handleConfirmRevoke}
+            delegatedWallet={policy.delegatedWallet}
+          />
+
+          {/* Collapsible Demo Controls (Bottom-Left) */}
+          <DemoControls
+            isSimulated={isSimulated}
+            onInjectDrift={handleInjectDrift}
+            onArmNow={handleArmNow}
+            onReset={handleReset}
+          />
+        </>
+      )}
     </div>
   );
 }

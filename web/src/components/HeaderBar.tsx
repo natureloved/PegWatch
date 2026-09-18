@@ -1,11 +1,13 @@
 import React from 'react';
 import type { Status, Policy } from '../types';
 import { RegimePill } from './RegimePill';
-import { Shield, ShieldAlert } from 'lucide-react';
+import { Shield, ShieldAlert, LayoutDashboard, Globe } from 'lucide-react';
 
 interface HeaderBarProps {
   status: Status;
   policy: Policy;
+  viewMode: 'landing' | 'terminal';
+  onChangeViewMode: (mode: 'landing' | 'terminal') => void;
   onOpenRevokeModal: () => void;
   onRestoreDelegation: () => void;
 }
@@ -13,56 +15,92 @@ interface HeaderBarProps {
 export const HeaderBar: React.FC<HeaderBarProps> = ({
   status,
   policy,
+  viewMode,
+  onChangeViewMode,
   onOpenRevokeModal,
   onRestoreDelegation,
 }) => {
   const isDelegated = policy.delegated;
 
   return (
-    <header className="w-full bg-panel/80 border-b border-panel-border px-6 py-3.5 backdrop-blur-md sticky top-0 z-40">
+    <header className="w-full bg-panel/85 border-b border-panel-border px-6 py-3 backdrop-blur-md sticky top-0 z-40">
       <div className="max-w-7xl mx-auto flex items-center justify-between flex-wrap gap-4">
         {/* Left: Geometric Shield Logomark + Wordmark + Tagline */}
         <div className="flex items-center gap-3">
-          {/* PegWatch Geometric Shield/Peg Glyph */}
-          <div className="relative w-9 h-9 flex items-center justify-center rounded-lg bg-panel-elevated border border-mint/30 shadow-[0_0_15px_rgba(61,242,182,0.15)]">
-            <svg
-              viewBox="0 0 24 24"
-              className="w-5 h-5 text-mint"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              {/* Geometric shield with central peg pin */}
-              <path d="M12 2L4 6v6c0 5.5 3.8 10.7 8 12 4.2-1.3 8-6.5 8-12V6l-8-4z" />
-              <circle cx="12" cy="11" r="2.5" fill="currentColor" />
-              <path d="M12 13.5V17" />
-            </svg>
-          </div>
-
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-bold text-lg tracking-tight text-white font-sans">
-                PegWatch
-              </span>
-              <span className="px-1.5 py-0.5 rounded text-[10px] font-mono uppercase tracking-wider bg-panel-elevated border border-slate-700 text-slate-400">
-                Base
-              </span>
+          <button
+            onClick={() => onChangeViewMode('landing')}
+            className="flex items-center gap-3 text-left group cursor-pointer focus:outline-none"
+          >
+            {/* PegWatch Geometric Shield */}
+            <div className="relative w-9 h-9 flex items-center justify-center rounded-lg bg-panel-elevated border border-mint/30 shadow-[0_0_15px_rgba(61,242,182,0.15)] group-hover:border-mint transition-colors">
+              <svg
+                viewBox="0 0 24 24"
+                className="w-5 h-5 text-mint"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M12 2L4 6v6c0 5.5 3.8 10.7 8 12 4.2-1.3 8-6.5 8-12V6l-8-4z" />
+                <circle cx="12" cy="11" r="2.5" fill="currentColor" />
+                <path d="M12 13.5V17" />
+              </svg>
             </div>
-            <p className="text-[11px] font-sans text-slate-400 tracking-wide">
-              24/7 guardrail for tokenized equities.
-            </p>
-          </div>
+
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-lg tracking-tight text-white font-sans group-hover:text-mint transition-colors">
+                  PegWatch
+                </span>
+                <span className="px-1.5 py-0.5 rounded text-[10px] font-mono uppercase tracking-wider bg-panel-elevated border border-slate-700 text-slate-400">
+                  Base
+                </span>
+              </div>
+              <p className="text-[11px] font-sans text-slate-400 tracking-wide">
+                24/7 guardrail for tokenized equities
+              </p>
+            </div>
+          </button>
         </div>
 
-        {/* Center: Regime Pill (ambient state) */}
-        <div className="flex-1 flex justify-center">
-          <RegimePill
-            regime={status.regime}
-            feedFrozen={status.feedFrozen}
-            feedUpdatedAt={status.feedUpdatedAt}
-          />
+        {/* Center: View Switcher Tabs & Regime Pill */}
+        <div className="flex items-center gap-3">
+          {/* View Mode Switcher */}
+          <div className="flex items-center p-1 rounded-xl bg-obsidian border border-panel-border text-xs font-mono">
+            <button
+              onClick={() => onChangeViewMode('landing')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                viewMode === 'landing'
+                  ? 'bg-panel-elevated text-mint font-semibold shadow-sm border border-mint/30'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <Globe size={13} />
+              <span>Overview</span>
+            </button>
+
+            <button
+              onClick={() => onChangeViewMode('terminal')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                viewMode === 'terminal'
+                  ? 'bg-panel-elevated text-mint font-semibold shadow-sm border border-mint/30'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <LayoutDashboard size={13} />
+              <span>Mission Control</span>
+            </button>
+          </div>
+
+          {/* Regime Pill */}
+          <div className="hidden md:block">
+            <RegimePill
+              regime={status.regime}
+              feedFrozen={status.feedFrozen}
+              feedUpdatedAt={status.feedUpdatedAt}
+            />
+          </div>
         </div>
 
         {/* Right: Delegated Wallet Chip & Revoke/Restore Action */}
@@ -89,7 +127,7 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
               title="Revoke the agent's signing delegation"
             >
               <ShieldAlert size={13} />
-              <span>Revoke Access</span>
+              <span className="hidden sm:inline">Revoke Access</span>
             </button>
           ) : (
             <button
@@ -99,7 +137,7 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
               title="Restore Dynamic signing delegation"
             >
               <Shield size={13} />
-              <span>Restore Delegation</span>
+              <span className="hidden sm:inline">Restore</span>
             </button>
           )}
         </div>
