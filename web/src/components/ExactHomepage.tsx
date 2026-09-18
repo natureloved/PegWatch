@@ -213,9 +213,10 @@ export const ExactHomepage: React.FC<ExactHomepageProps> = ({ onGoToDashboard })
           <div className="nav-links">
             <a href="#how">How it works</a>
             <a href="#stack">Stack</a>
+            <a href="https://t.me/pegwatchbot" target="_blank" rel="noopener noreferrer">@pegwatchbot</a>
             <a href="https://github.com/natureloved/PegWatch" target="_blank" rel="noopener noreferrer">GitHub</a>
             <button onClick={onGoToDashboard} className="btn" style={{ padding: '9px 18px' }}>
-              Live Demo
+              Dashboard
             </button>
           </div>
         </div>

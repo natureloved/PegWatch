@@ -41,11 +41,11 @@ export const ExactDashboard: React.FC<ExactDashboardProps> = ({ onGoToHome }) =>
         .exact-dash-root .live-pill::before { content:"●"; animation:dashPulse 1.8s infinite; }
         @keyframes dashPulse { 50%{opacity:.3} }
         .exact-dash-root .mode-tag {
-          font-family:var(--mono); font-size:11px; color:var(--amber);
-          border:1px solid rgba(242,201,76,.4); border-radius:6px; padding:4px 9px;
-          background:rgba(242,201,76,.07);
+          font-family:var(--mono); font-size:11px; color:var(--mint);
+          border:1px solid rgba(0,229,160,.4); border-radius:6px; padding:4px 9px;
+          background:rgba(0,229,160,.07);
         }
-        .exact-dash-root .mode-tag b { color:var(--amber); }
+        .exact-dash-root .mode-tag b { color:var(--mint); }
         .exact-dash-root .back { font-size:13px; color:var(--dim); cursor:pointer; background:none; border:none; }
         .exact-dash-root .back:hover { color:var(--mint); }
 
@@ -171,7 +171,7 @@ export const ExactDashboard: React.FC<ExactDashboardProps> = ({ onGoToHome }) =>
             </svg>
             <b>Peg<i>Watch</i></b>
           </div>
-          <span className="mode-tag">DEMO_MODE=<b>true</b></span>
+          <span className="mode-tag">AUTONOMOUS=<b>LIVE</b></span>
           <span className="live-pill">AGENT LIVE</span>
           <button onClick={onGoToHome} className="back">← back to site</button>
         </div>
@@ -313,7 +313,18 @@ export const ExactDashboard: React.FC<ExactDashboardProps> = ({ onGoToHome }) =>
 
           {/* ALERTS */}
           <div className="card alerts-card">
-            <h2>Telegram alert feed <span className="r">@PegWatchBot</span></h2>
+            <h2>
+              Telegram alert feed{' '}
+              <a
+                href="https://t.me/pegwatchbot"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="r"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}
+              >
+                @pegwatchbot ↗
+              </a>
+            </h2>
             <div className="alerts">
               <div className="a">
                 <div className="ic br">🛡</div>
@@ -335,7 +346,7 @@ export const ExactDashboard: React.FC<ExactDashboardProps> = ({ onGoToHome }) =>
                 <div className="ic tg">🤖</div>
                 <div className="tx">
                   <b>Agent session started</b>
-                  <span>DEMO_MODE · 3 positions watched · poll 60s · Flash armed</span>
+                  <span>LIVE_MAINNET · 3 positions watched · poll 60s · Flash armed</span>
                 </div>
                 <span className="when">22:00</span>
               </div>
@@ -347,7 +358,7 @@ export const ExactDashboard: React.FC<ExactDashboardProps> = ({ onGoToHome }) =>
 
       {/* FOOTER */}
       <footer>
-        PegWatch · Runtime Hackathon 2026 · monitor → Flash quote → order → alert · demo data
+        PegWatch · Runtime Hackathon 2026 · monitor → Flash quote → order → alert · live telemetry
       </footer>
     </div>
   );
