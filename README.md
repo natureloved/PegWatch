@@ -60,11 +60,38 @@ Judges can inspect the exact files and lines implementing the sponsor rails:
 
 | Sponsor Rail | Implementation File | Key Functions & Responsibilities |
 |---|---|---|
-| **Definitive Flash** | [`backend/src/execution/flashClient.ts`](backend/src/execution/flashClient.ts) | • `POST https://flash.definitive.fi/v1/quote` for stop-loss triggers<br>• EIP-712 typed data signing (`evm.orderTypedData`)<br>• `POST https://flash.definitive.fi/v1/order` submission<br>• Order polling and BaseScan tx extraction |
-| **Dynamic** | [`backend/src/execution/riskPolicy.ts`](backend/src/execution/riskPolicy.ts)<br>[`backend/src/execution/walletSigner.ts`](backend/src/execution/walletSigner.ts) | • Delegated signing authority enforcement<br>• Instant user revocation (`is_delegated: 0`)<br>• Per-action notional guardrails ($50 cap) & daily allowance tracking |
+| **Definitive Flash** | [`backend/src/execution/flashClient.ts`](backend/src/execution/flashClient.ts)<br>[`backend/src/config/constants.ts`](backend/src/config/constants.ts) | • Native Trigger Orders: `POST https://flash.definitive.fi/v1/quote` with `orderType: "stop-loss"` and `triggers: [{ notionalPrice, triggerType: "lower" }]`<br>• Protective Attached Brackets (`executeBracketOrder`) & Dynamic Trigger Updates (`updateTriggerPrice`)<br>• EIP-712 typed data signing (`evm.orderTypedData` on `DefinitiveFlashAllowance`)<br>• Fully non-custodial: funds remain in user wallet until trigger executes<br>• Managed execution: Flash relayer handles gas, MEV protection, nonces, and retries |
+| **Dynamic** | [`backend/src/execution/riskPolicy.ts`](backend/src/execution/riskPolicy.ts)<br>[`backend/src/execution/walletSigner.ts`](backend/src/execution/walletSigner.ts) | • Delegated signing authority enforcement<br>• Instant user revocation (`is_delegated: 0`)<br>• Per-action notional guardrails ($50 cap), 300s cooldown, & daily allowance tracking |
 | **Bankr LLM Gateway** | [`backend/src/reasoning/bankrReasoner.ts`](backend/src/reasoning/bankrReasoner.ts) | • `https://llm.bankr.bot/v1/chat/completions`<br>• Authenticates with `X-API-Key`<br>• Generates 2-sentence plain-English explanations of peg drift causes and de-risking intent |
 
 ---
+
+## Why Definitive Flash is the Ideal Rail for Autonomous Risk Agents
+
+During build prototyping, we discovered that **Definitive Flash natively provides the exact execution mechanics required for PegWatch**:
+
+1. **Native Trigger Orders (`stop-loss`, `stop`, `attachedBracket`)**:
+   Instead of an agent needing to wake up and race an on-chain market order during a sudden liquidity cascade, PegWatch creates a **Flash Stop-Loss Trigger Order** at the edge of the acceptable peg band. Flash monitors the price in its high-speed managed orderbook and executes immediately when triggered.
+2. **Non-Custodial Security Model**:
+   Even with an active trigger order, the user **never surrenders custody** of their `NVDAc` tokens. The assets remain safely in the user's wallet until the trigger condition fires on Base.
+3. **Managed Execution (Zero Gas & Zero MEV for Agent)**:
+   The agent does not need to fund gas for trade execution or worry about stuck nonces and front-running sandwich attacks. Flash's execution network handles gas, MEV protection, nonces, and retries.
+4. **Dynamic Trigger Updates without On-Chain Gas**:
+   When peg bands widen or tighten (e.g. transitioning from Friday evening to deep weekend), PegWatch can dynamically move the stop-loss trigger price simply by signing an off-chain update message—no costly cancel/resubmit on-chain transactions required!
+5. **Ready for Production**:
+   - **Public Dev Key**: `dpka_513a2bd7_57a2_46d2_927b_2a3857fe271b` (works immediately for local evaluation).
+   - **Token Resolution**: `GET /v1/search?query=NVDA&chain=base` resolves NVDAc decimals (8) and contract address.
+   - **Dashboard**: Track volume and order status live at [app.definitive.fi/flash-dashboard](https://app.definitive.fi/flash-dashboard).
+   - **Protocol Monetization**: Integrators can earn fee revenue via `flashIntegratorFeeBps` + `feeRecipient`.
+
+---
+
+## Security & Autonomous Signing Model
+
+- **Hackathon Demo Architecture**: The agent runs with a local server-side signer wallet configured via `AGENT_SIGNER_PRIVATE_KEY` in `.env`. The agent signs EIP-712 order typed data for Flash orders only when pre-conditions pass strict risk guardrails (per-action notional cap, 300s cooldown, daily spending allowance).
+- **Non-Custodial Safeguard**: Because Flash uses typed allowance orders (`FlashOrder`), the private key cannot execute arbitrary transfers—it can only sign valid trading quotes bounded by the Flash smart contract.
+- **Production Roadmap**: Production deployments will transition to ERC-4337 smart accounts and Dynamic session keys, granting time-bounded, scoped execution authority without exposing long-term private keys.
+
 
 ## What is Live vs. Simulated (Honest Demo Disclosure)
 

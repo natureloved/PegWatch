@@ -10,7 +10,7 @@ export const ASSETS = {
     symbol: "NVDAc",
     name: "NVIDIA (Coinbase Tokenized Equity)",
     address: "0xb20000000000000000000078ee7ce2fE4908108C" as `0x${string}`,
-    decimals: 18,
+    decimals: 8, // Confirmed 8 decimals on Base via Definitive Flash /v1/search
     // Chainlink Reference Price feed for NVDAc on Base
     chainlinkFeed: (process.env.CHAINLINK_NVDA_FEED_ADDRESS || "0xa50ba344175782782b545d6541fce2cfa0c1f6b1") as `0x${string}`,
     // Benchmark Friday Close price when oracle freezes
@@ -49,4 +49,13 @@ export enum MarketRegime {
 }
 
 export const FLASH_API_BASE_URL = "https://flash.definitive.fi/v1";
+export const FLASH_PUBLIC_DEV_KEY = "dpka_513a2bd7_57a2_46d2_927b_2a3857fe271b";
+export const FLASH_MCP_PACKAGE = "@definitive-fi/flash-mcp";
+
+// Flash Integrator Monetization (Optional fee hook)
+export const FLASH_INTEGRATOR_CONFIG = {
+  flashIntegratorFeeBps: 10, // 0.10% protocol fee
+  feeRecipient: "0x0113c233c1628d09B5927ea948197793d56B0233" as `0x${string}`,
+};
+
 export const BANKR_LLM_GATEWAY_URL = "https://llm.bankr.bot/v1/chat/completions";

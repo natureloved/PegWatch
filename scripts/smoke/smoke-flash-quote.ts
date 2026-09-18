@@ -34,8 +34,8 @@ async function runFlashQuoteSmokeTest() {
     contraChain: "base",
     side: "sell",
     qty: "0.01",
-    orderType: "market",
-    maxSlippage: "0.01",
+    orderType: "stop-loss",
+    triggers: [{ notionalPrice: "115.00", triggerType: "lower" }],
     funderAddress: TEST_FUNDER_ADDRESS,
   };
 
@@ -64,13 +64,15 @@ async function runFlashQuoteSmokeTest() {
     if (response.ok) {
       console.log("\n[FLASH QUOTE SUCCESS]:");
       console.log(`Quote ID: ${data.quoteId || data.id || "N/A"}`);
-      console.log(`Notional Value: ${data.notional || data.contraQty || data.expectedOutput || "N/A"}`);
+      console.log(`Order Type: Stop-Loss Trigger (Native Flash Managed Order)`);
+      console.log(`Trigger Price: $115.00 USD (lower threshold)`);
       if (data.evm?.orderTypedData) {
-        console.log(`EVM Typed Data: Present for signing (Domain: ${data.evm.orderTypedData.domain?.name})`);
+        const parsed = typeof data.evm.orderTypedData === "string" ? JSON.parse(data.evm.orderTypedData) : data.evm.orderTypedData;
+        console.log(`EVM Typed Data: Present for signing (Contract: ${parsed.domain?.verifyingContract || parsed.domain?.name})`);
       }
       console.log("\n--------------------------------------------------");
       console.log(">>> RESULT: PASS <<<");
-      console.log("Valid quote retrieved from Definitive Flash API.");
+      console.log("Valid native trigger order quote retrieved from Definitive Flash API.");
       console.log("--------------------------------------------------\n");
       process.exitCode = 0;
       return;

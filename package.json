@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "description": "PegWatch: Autonomous Risk Agent for Tokenized Equities on Base",
   "main": "backend/src/server.ts",
+  "type": "module",
   "scripts": {
+    "build": "tsc",
     "smoke:price": "tsx scripts/smoke/smoke-price.ts",
     "smoke:flash": "tsx scripts/smoke/smoke-flash-quote.ts",
     "smoke:wallet": "tsx scripts/smoke/smoke-wallet.ts",
