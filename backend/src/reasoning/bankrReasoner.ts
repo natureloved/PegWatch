@@ -17,10 +17,11 @@ export interface ReasoningContext {
 }
 
 export class BankrReasoner {
-  private apiKey: string;
+  private isEnabled: boolean;
 
   constructor() {
-    this.apiKey = process.env.BANKR_API_KEY || "";
+    // Bankr Agent API is scaffolded; disabled under $0 free tier rule
+    this.isEnabled = process.env.BANKR_ENABLED === "true";
   }
 
   /**
@@ -30,7 +31,7 @@ export class BankrReasoner {
     const stalenessHours = (ctx.stalenessSec / 3600).toFixed(1);
     const deviationFormatted = `${ctx.deviationPct >= 0 ? "+" : ""}${ctx.deviationPct.toFixed(2)}%`;
 
-    if (this.apiKey) {
+    if (this.isEnabled && process.env.BANKR_API_KEY) {
       try {
         const prompt = {
           model: "bankr-default",

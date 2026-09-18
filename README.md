@@ -62,7 +62,7 @@ Judges can inspect the exact files and lines implementing the sponsor rails:
 |---|---|---|
 | **Definitive Flash** | [`backend/src/execution/flashClient.ts`](backend/src/execution/flashClient.ts)<br>[`backend/src/config/constants.ts`](backend/src/config/constants.ts) | • Native Trigger Orders: `POST https://flash.definitive.fi/v1/quote` with `orderType: "stop-loss"` and `triggers: [{ notionalPrice, triggerType: "lower" }]`<br>• Protective Attached Brackets (`executeBracketOrder`) & Dynamic Trigger Updates (`updateTriggerPrice`)<br>• EIP-712 typed data signing (`evm.orderTypedData` on `DefinitiveFlashAllowance`)<br>• Fully non-custodial: funds remain in user wallet until trigger executes<br>• Managed execution: Flash relayer handles gas, MEV protection, nonces, and retries |
 | **Dynamic** | [`backend/src/execution/riskPolicy.ts`](backend/src/execution/riskPolicy.ts)<br>[`backend/src/execution/walletSigner.ts`](backend/src/execution/walletSigner.ts) | • Delegated signing authority enforcement<br>• Instant user revocation (`is_delegated: 0`)<br>• Per-action notional guardrails ($50 cap), 300s cooldown, & daily allowance tracking |
-| **Bankr LLM Gateway** | [`backend/src/reasoning/bankrReasoner.ts`](backend/src/reasoning/bankrReasoner.ts) | • `https://llm.bankr.bot/v1/chat/completions`<br>• Authenticates with `X-API-Key`<br>• Generates 2-sentence plain-English explanations of peg drift causes and de-risking intent |
+| **Bankr (Scaffolded Roadmap)** | [`backend/src/reasoning/bankrReasoner.ts`](backend/src/reasoning/bankrReasoner.ts) | • Agent API integration scaffolded (`prompt` → `intent` → `execution`)<br>• Built-in deterministic institutional risk reasoning engine active<br>• Self-funding wallet model targeted for Phase 2 vault automation |
 
 ---
 
@@ -209,6 +209,7 @@ That is precisely the point of PegWatch: Chainlink equity oracles are designed t
 
 ## Roadmap
 
+- **Bankr Self-Funding Vault Activation**: *Bankr Agent API integration is scaffolded (`prompt` → `intent` → `execution`) — full activation pending account tier. Bankr's self-funding wallet model is the Phase 2 vault path.*
 - **Dual-Regime Vault (PegVault)**: ERC-4626 tokenized vault that holds B20 equities during active market hours and automatically rotates into yield-bearing USDC/sUSDe when weekend peg drift volatility exceeds tolerance.
 - **CCA Batch Auction Auctions**: Integration with Uniswap CCA batch auctions for dark market liquidity resolution.
 - **Cross-Equity Expansion**: Expanding coverage from NVDAc to all 13 Base B20 equities (AAPLc, TSLAc, METAc, GOOGLc).
