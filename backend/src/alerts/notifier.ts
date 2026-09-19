@@ -5,7 +5,7 @@
 import { AgentAction } from "../db/database.js";
 
 function formatRegime(regime: string): string {
-  const clean = regime?.replace(/[_\s]+/g, " ").trim().toUpperCase() || "";
+  const clean = regime?.replace(/[_\s-]+/g, "").trim().toUpperCase() || "";
   if (clean.includes("WEEKEND")) return "Weekend Dark Market (24/5 Oracle Frozen)";
   if (clean.includes("WEEKDAY")) return "Weekday Market";
   if (clean.includes("OVERNIGHT")) return "Overnight Dark Market";
@@ -13,15 +13,14 @@ function formatRegime(regime: string): string {
 }
 
 function formatActionType(action: string): string {
-  const clean = action?.replace(/[_\s]+/g, " ").trim().toUpperCase() || "";
-  if (clean.includes("STOP") && clean.includes("DERISK")) return "Stop-Loss Order (De-Risk)";
-  if (clean.includes("STOP")) return "Stop-Loss Trigger Order";
+  const clean = action?.replace(/[_\s-]+/g, "").trim().toUpperCase() || "";
+  if (clean.includes("STOP") || clean.includes("DERISK")) return "Stop-Loss Order (De-Risk)";
   if (clean.includes("TAKE")) return "Take-Profit Bracket Order";
   return action?.replace(/_/g, " ") || "Risk Mitigation Order";
 }
 
 function formatStatus(status: string): string {
-  const clean = status?.replace(/[_\s]+/g, " ").trim().toUpperCase() || "";
+  const clean = status?.replace(/[_\s-]+/g, "").trim().toUpperCase() || "";
   if (clean.includes("SIMULATED")) return "Executed (Flash Trigger Armed)";
   if (clean.includes("FILLED")) return "Executed on Base";
   if (clean.includes("ARMED")) return "Armed & Active";
@@ -47,8 +46,15 @@ export class AlertNotifier {
       ? `<a href="${action.explorer_url}">View on BaseScan</a>`
       : "Confirmed on Base";
 
+    // Sanitize any potential asterisks and format enum occurrences in reason
+    const cleanReason = (action.reason || "")
+      .replace(/\*/g, "")
+      .replace(/STOP_LOSS_DE_RISK/gi, "Stop-Loss Order (De-Risk)")
+      .replace(/WEEKEND_DARK_MARKET/gi, "Weekend Dark Market")
+      .replace(/SIMULATED_FILLED/gi, "Executed (Flash Trigger Armed)");
+
     // Clean, proper HTML format without any raw asterisks (*)
-    const message = `🚨 <b>PegWatch Risk Alert: ${action.token_symbol}</b>
+    const rawMessage = `🚨 <b>PegWatch Risk Alert: ${action.token_symbol}</b>
 
 • <b>Action:</b> ${actionStr}
 • <b>Deviation:</b> ${formattedDeviation} (${regimeStr})
@@ -56,9 +62,11 @@ export class AlertNotifier {
 • <b>Status:</b> ${statusStr}
 
 <b>Reasoning:</b>
-${action.reason}
+${cleanReason}
 
 🔗 <b>Tx Hash:</b> ${explorerLink}`;
+
+    const message = rawMessage.replace(/\*/g, "");
 
     console.log("\n--------------------------------------------------");
     console.log(`[ALERT NOTIFICATION DISPATCHED]`);

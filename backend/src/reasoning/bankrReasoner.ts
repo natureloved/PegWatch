@@ -18,10 +18,12 @@ export interface ReasoningContext {
 
 export class BankrReasoner {
   private isEnabled: boolean;
+  private apiKey?: string;
 
   constructor() {
     // Bankr Agent API is scaffolded; disabled under $0 free tier rule
     this.isEnabled = process.env.BANKR_ENABLED === "true";
+    this.apiKey = process.env.BANKR_API_KEY;
   }
 
   /**
@@ -59,8 +61,8 @@ Action: ${ctx.actionType} of ${ctx.qty} ${ctx.tokenSymbol} ($${ctx.notionalUsd} 
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "X-API-Key": this.apiKey,
-            "Authorization": `Bearer ${this.apiKey}`
+            "X-API-Key": this.apiKey || "",
+            "Authorization": `Bearer ${this.apiKey || ""}`
           },
           body: JSON.stringify(prompt)
         });
@@ -76,10 +78,11 @@ Action: ${ctx.actionType} of ${ctx.qty} ${ctx.tokenSymbol} ($${ctx.notionalUsd} 
     }
 
     // Heuristic Reasoner Fallback
+    const actionLabel = ctx.actionType.includes("STOP") ? "Stop-Loss Order" : "Protective Order";
     if (ctx.regime.includes("WEEKEND")) {
-      return `${ctx.tokenSymbol} DEX price drifted ${deviationFormatted} from Friday's official close while the Chainlink equity oracle has been frozen for ${stalenessHours} hours over the weekend dark market. PegWatch executed a protective ${ctx.actionType} of ${ctx.qty} ${ctx.tokenSymbol} ($${ctx.notionalUsd}) to mitigate downside exposure before Monday's market open.`;
+      return `${ctx.tokenSymbol} DEX price drifted ${deviationFormatted} from Friday's official close while the Chainlink equity oracle has been frozen for ${stalenessHours} hours over the weekend dark market. PegWatch executed a protective ${actionLabel} of ${ctx.qty} ${ctx.tokenSymbol} ($${ctx.notionalUsd}) to mitigate downside exposure before Monday's market open.`;
     } else {
-      return `${ctx.tokenSymbol} DEX price deviated ${deviationFormatted} from fair value, exceeding the active ${ctx.regime} volatility guardrail. PegWatch placed an automated protective order for ${ctx.qty} ${ctx.tokenSymbol} ($${ctx.notionalUsd}) within delegated user risk parameters.`;
+      return `${ctx.tokenSymbol} DEX price deviated ${deviationFormatted} from fair value, exceeding the active volatility guardrail. PegWatch placed an automated protective ${actionLabel} for ${ctx.qty} ${ctx.tokenSymbol} ($${ctx.notionalUsd}) within delegated user risk parameters.`;
     }
   }
 }
