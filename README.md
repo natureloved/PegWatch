@@ -5,13 +5,14 @@
 # PegWatch <img src="assets/logo.png" alt="PegWatch Logo" width="34" align="center" />
 > **Autonomous Risk Agent for Tokenized Equities on Base**  
 > *Built for the Runtime Hackathon (NYC + Online, Sep 13–19, 2026)*  
-> **Tracks:** Definitive Flash • Dynamic Delegated Access • Base
+> **Tracks:** Definitive Flash • Dynamic Delegated Access • Base  
+> **Demo asset:** NVDAc (xStocks tokenized NVIDIA on Base)
 
 ---
 
 ## The Problem (Why PegWatch Exists)
 
-1. **Tokenized equities on Base** (Coinbase's B20 tokens: `NVDAc`, `AAPLc`, `TSLA`, `META`, `GOOGL`, etc.) trade **24/7** on decentralized exchanges like Aerodrome.
+1. **Tokenized equities on Base** (xStocks tokenized equities such as `NVDAc`, `TSLAx`, `AAPLx`, etc.) trade **24/7** on decentralized exchanges like Aerodrome.
 2. **Official on-chain price feeds** (Chainlink, per Base's official documentation) run **24/5** — they *"hold the last close on weekends and holidays"*. Base explicitly warns protocol developers: *"apply staleness bounds before relying on the price; never settle or liquidate against a frozen feed."*
 3. From **Friday 4:00 PM ET to Monday 9:30 AM ET (~65.5 hours)**, holders have no active on-chain fair value, no automated monitoring, and no institutional protection against market-moving news or weekend illiquidity shocks. DEX prices can drift significantly from Friday's closing benchmark.
 4. **Humans sleep.** The only actor that can respond at 3:00 AM on Saturday within pre-approved portfolio risk limits is an autonomous agent with a delegated wallet. **PegWatch is that agent.**
@@ -100,9 +101,10 @@ During build prototyping, we discovered that **Definitive Flash natively provide
 ## What is Live vs. Simulated (Honest Demo Disclosure)
 
 In strict adherence to the hackathon rules:
+- **Demo Asset**: **NVDAc (xStocks tokenized NVIDIA on Base)** (`0xb20000000000000000000078ee7ce2fE4908108C`).
 - **Live On-Chain Data**: Aerodrome DEX prices and pool states are queried live from Base (`0xb20000000000000000000078ee7ce2fE4908108C`).
 - **Live Oracles**: Chainlink reference prices, timestamps, and staleness bounds are verified on-chain.
-- **Simulated Injected Drift**: Because crypto markets do not always experience macro shocks on demand during judge evaluations, the **Demo Simulation Station** on the dashboard allows judges to inject simulated peg drift (e.g. `-3.8%`) against real live market feeds. Every simulated input is transparently labeled in logs, ledger rows, and badges as `Simulated Input / Demo`.
+- **Simulated Injected Drift**: Because crypto markets do not always experience macro shocks on demand during judge evaluations, the **Demo Simulation Station** on the dashboard allows judges to inject simulated peg drift (e.g. `+15.0%`) against real live market feeds. Every simulated input is transparently labeled in logs, ledger rows, and badges as `Simulated Input / Demo`.
 
 ---
 
