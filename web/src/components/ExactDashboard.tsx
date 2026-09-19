@@ -755,7 +755,15 @@ export const ExactDashboard: React.FC<ExactDashboardProps> = ({ onGoToHome }) =>
 
       {/* FOOTER */}
       <footer>
-        PegWatch · Runtime Hackathon 2026 · monitor → Flash quote → order → alert · live telemetry on Base Mainnet
+        PegWatch · Runtime Hackathon 2026 · monitor → Flash quote → order → alert · built by{' '}
+        <a
+          href="https://x.com/RastaDev_"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ color: 'var(--mint)', textDecoration: 'none' }}
+        >
+          RastaDev ↗
+        </a>
       </footer>
     </div>
   );

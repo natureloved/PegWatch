@@ -578,11 +578,17 @@ export const ExactHomepage: React.FC<ExactHomepageProps> = ({ onGoToDashboard })
             <span>PegWatch — Runtime Hackathon 2026 · AI agents × crypto rails</span>
           </div>
           <div style={{ display: 'flex', gap: 18, alignItems: 'center', flexWrap: 'wrap' }}>
-            <a href="#stack">Stack</a>
             <a href="https://t.me/pegwatchbot" target="_blank" rel="noopener noreferrer">@pegwatchbot</a>
             <a href="https://github.com/natureloved/PegWatch" target="_blank" rel="noopener noreferrer">GitHub</a>
             <a href="https://docs.definitive.fi/developers/flash-api-new" target="_blank" rel="noopener noreferrer">Flash docs</a>
-            <span style={{ color: 'var(--faint)' }}>built by RastaDev</span>
+            <a
+              href="https://x.com/RastaDev_"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: 'var(--mint)', display: 'inline-flex', alignItems: 'center', gap: 4 }}
+            >
+              built by RastaDev ↗
+            </a>
           </div>
         </div>
       </footer>
