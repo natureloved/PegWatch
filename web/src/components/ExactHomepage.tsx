@@ -198,9 +198,6 @@ export const ExactHomepage: React.FC<ExactHomepageProps> = ({ onGoToDashboard })
           </div>
           <div className="nav-links">
             <a href="#how">How it works</a>
-            <a href="#stack">Stack</a>
-            <a href="https://t.me/pegwatchbot" target="_blank" rel="noopener noreferrer">@pegwatchbot</a>
-            <a href="https://github.com/natureloved/PegWatch" target="_blank" rel="noopener noreferrer">GitHub</a>
             <button onClick={onGoToDashboard} className="btn" style={{ padding: '9px 18px' }}>
               Dashboard
             </button>
@@ -401,14 +398,17 @@ export const ExactHomepage: React.FC<ExactHomepageProps> = ({ onGoToDashboard })
       {/* FOOTER */}
       <footer>
         <div className="wrap foot">
-          <span>PegWatch — Runtime Hackathon 2026 · AI agents × crypto rails</span>
-          <span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <img src="/logo.png" alt="PegWatch" style={{ width: 22, height: 22, objectFit: 'contain' }} />
+            <span>PegWatch — Runtime Hackathon 2026 · AI agents × crypto rails</span>
+          </div>
+          <div style={{ display: 'flex', gap: 18, alignItems: 'center', flexWrap: 'wrap' }}>
+            <a href="#stack">Stack</a>
+            <a href="https://t.me/pegwatchbot" target="_blank" rel="noopener noreferrer">@pegwatchbot</a>
+            <a href="https://github.com/natureloved/PegWatch" target="_blank" rel="noopener noreferrer">GitHub</a>
             <a href="https://docs.definitive.fi/developers/flash-api-new" target="_blank" rel="noopener noreferrer">Flash docs</a>
-            {' · '}
-            <a href="https://github.com/natureloved/PegWatch" target="_blank" rel="noopener noreferrer">repo</a>
-            {' · '}
-            built by RastaDev
-          </span>
+            <span style={{ color: 'var(--faint)' }}>built by RastaDev</span>
+          </div>
         </div>
       </footer>
     </div>
