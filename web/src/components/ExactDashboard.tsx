@@ -121,20 +121,50 @@ export const ExactDashboard: React.FC<ExactDashboardProps> = ({ onGoToHome }) =>
 
         /* alerts */
         .exact-dash-root .alerts-card { grid-column:span 12; }
-        .exact-dash-root .alerts { padding:6px 0; }
-        .exact-dash-root .alerts .a { display:flex; gap:12px; align-items:flex-start; padding:11px 16px; border-bottom:1px solid rgba(31,50,64,.5); }
-        .exact-dash-root .alerts .a:last-child { border-bottom:none; }
+        .exact-dash-root .alerts { padding:12px 16px; display:flex; flex-direction:column; gap:12px; }
+        .exact-dash-root .alerts .a {
+          display:flex; gap:14px; align-items:flex-start; padding:14px 18px;
+          background:rgba(10,18,24,.75); border:1px solid var(--line); border-radius:10px;
+          transition: border-color .2s ease, box-shadow .2s ease;
+        }
+        .exact-dash-root .alerts .a:hover { border-color:rgba(0,229,160,.35); box-shadow:0 8px 24px rgba(0,0,0,.3); }
         .exact-dash-root .alerts .ic {
-          width:34px; height:34px; border-radius:9px; display:flex; align-items:center;
-          justify-content:center; flex-shrink:0; font-size:15px;
+          width:38px; height:38px; border-radius:9px; display:flex; align-items:center;
+          justify-content:center; flex-shrink:0; font-size:17px; margin-top:2px;
         }
         .exact-dash-root .alerts .ic.tg { background:rgba(0,145,255,.12); border:1px solid rgba(0,145,255,.35); }
-        .exact-dash-root .alerts .ic.sh { background:rgba(0,229,160,.1); border:1px solid rgba(0,229,160,.3); }
-        .exact-dash-root .alerts .ic.br { background:rgba(255,84,112,.1); border:1px solid rgba(255,84,112,.3); }
-        .exact-dash-root .alerts .tx { font-size:13.5px; }
-        .exact-dash-root .alerts .tx b { display:block; font-size:13px; }
-        .exact-dash-root .alerts .tx span { color:var(--dim); font-size:12.5px; font-family:var(--mono); }
-        .exact-dash-root .alerts .when { margin-left:auto; color:var(--faint); font-family:var(--mono); font-size:11px; flex-shrink:0; }
+        .exact-dash-root .alerts .ic.sh { background:rgba(242,201,76,.12); border:1px solid rgba(242,201,76,.35); }
+        .exact-dash-root .alerts .ic.br { background:rgba(255,84,112,.12); border:1px solid rgba(255,84,112,.35); }
+        .exact-dash-root .alerts .tx { flex:1; font-size:13px; line-height:1.6; }
+        .exact-dash-root .alerts .alert-head {
+          display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; flex-wrap:wrap; gap:8px;
+        }
+        .exact-dash-root .alerts .alert-title {
+          font-size:14px; font-weight:700; color:var(--ink); display:flex; align-items:center; gap:8px;
+        }
+        .exact-dash-root .alerts .alert-tag {
+          font-family:var(--mono); font-size:10px; padding:2px 7px; border-radius:4px; font-weight:600;
+        }
+        .exact-dash-root .alerts .alert-tag.fire { background:rgba(255,84,112,.15); color:var(--red); border:1px solid rgba(255,84,112,.35); }
+        .exact-dash-root .alerts .alert-tag.warn { background:rgba(242,201,76,.15); color:#F2C94C; border:1px solid rgba(242,201,76,.35); }
+        .exact-dash-root .alerts .alert-tag.info { background:rgba(0,145,255,.15); color:var(--blue); border:1px solid rgba(0,145,255,.35); }
+        .exact-dash-root .alerts .alert-meta {
+          font-family:var(--mono); font-size:12px; color:var(--dim); margin-bottom:8px; line-height:1.7;
+        }
+        .exact-dash-root .alerts .alert-meta b { color:var(--ink); font-weight:600; }
+        .exact-dash-root .alerts .alert-reason {
+          background:rgba(18,29,37,.7); border-left:3px solid var(--mint);
+          padding:9px 13px; border-radius:4px; font-size:12.5px; color:#C9D6CF; margin-bottom:8px;
+        }
+        .exact-dash-root .alerts .alert-tx {
+          font-family:var(--mono); font-size:11.5px; color:var(--blue); display:flex; align-items:center; gap:6px;
+        }
+        .exact-dash-root .alerts .alert-tx a { color:var(--blue); text-decoration:none; }
+        .exact-dash-root .alerts .alert-tx a:hover { text-decoration:underline; color:var(--mint); }
+        .exact-dash-root .alerts .when {
+          color:var(--faint); font-family:var(--mono); font-size:11px;
+          background:rgba(31,50,64,.5); padding:3px 8px; border-radius:4px;
+        }
 
         .exact-dash-root footer { border-top:1px solid var(--line); padding:22px 0 40px; color:var(--faint); font-size:12.5px; font-family:var(--mono); text-align:center; }
 
@@ -300,7 +330,10 @@ export const ExactDashboard: React.FC<ExactDashboardProps> = ({ onGoToHome }) =>
           {/* ALERTS */}
           <div className="card alerts-card">
             <h2>
-              Telegram alert feed{' '}
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}>
+                Telegram alert feed
+                <span style={{ fontSize: 10.5, padding: '2px 7px', borderRadius: 4, background: 'rgba(0,229,160,.12)', color: 'var(--mint)', fontFamily: 'var(--mono)', fontWeight: 600 }}>● LIVE DISPATCH</span>
+              </span>
               <a
                 href="https://t.me/pegwatchbot"
                 target="_blank"
@@ -312,29 +345,96 @@ export const ExactDashboard: React.FC<ExactDashboardProps> = ({ onGoToHome }) =>
               </a>
             </h2>
             <div className="alerts">
+              {/* LIVE ALERT: NVDAc (Real Base execution) */}
+              <div className="a">
+                <div className="ic br">🚨</div>
+                <div className="tx">
+                  <div className="alert-head">
+                    <div className="alert-title">
+                      PegWatch Risk Alert: NVDAc
+                      <span className="alert-tag fire">STOP-LOSS EXECUTED</span>
+                    </div>
+                    <span className="when">03:01</span>
+                  </div>
+                  <div className="alert-meta">
+                    • <b>Action:</b> Stop-Loss Order (De-Risk) &nbsp;|&nbsp; • <b>Deviation:</b> +87.39% (Weekend Dark Market · 24/5 Oracle Frozen)<br/>
+                    • <b>Notional:</b> $10.99 (0.05 NVDAc) &nbsp;|&nbsp; • <b>Status:</b> Executed (Flash Trigger Armed)
+                  </div>
+                  <div className="alert-reason">
+                    <b>Reasoning:</b> NVDAc DEX price drifted +87.39% from Friday's official close while the Chainlink equity oracle has been frozen for 42.0 hours over the weekend dark market. PegWatch executed a protective Stop-Loss Order of 0.05 NVDAc ($10.99) to mitigate downside exposure before Monday's market open.
+                  </div>
+                  <div className="alert-tx">
+                    🔗 <b>Tx Hash:</b>{' '}
+                    <a
+                      href="https://basescan.org/tx/0xe6144888dc3f60fe8b39429a9c90463c41bbeac44baee7a93ea69de351af64ee"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      View on BaseScan (0xe614...64ee) ↗
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+              {/* ALERT 2: TSLAx Floor Breach */}
               <div className="a">
                 <div className="ic br">🛡</div>
                 <div className="tx">
-                  <b>TSLAx breached floor — stop-loss placed</b>
-                  <span>peg 0.962 &lt; 0.97 · sell 0.05 TSLAx @ 355 USDC · orderId 887ccf13</span>
+                  <div className="alert-head">
+                    <div className="alert-title">
+                      TSLAx Breached Floor — Stop-Loss Placed
+                      <span className="alert-tag fire">FLOOR BREACH</span>
+                    </div>
+                    <span className="when">03:00</span>
+                  </div>
+                  <div className="alert-meta">
+                    • <b>Action:</b> Stop-Loss Trigger &nbsp;|&nbsp; • <b>Peg:</b> 0.962 &lt; 0.970 Floor &nbsp;|&nbsp; • <b>Order:</b> sell 0.05 TSLAx @ 355 USDC (orderId: 887ccf13)
+                  </div>
+                  <div className="alert-reason">
+                    <b>Reasoning:</b> TSLAx secondary spot quote broke below the 0.970 protective risk floor. Agent quoted Flash stop-loss, signed via session wallet, and registered trigger order with Definitive relayer.
+                  </div>
+                  <div className="alert-tx">
+                    🔗 <b>Flash OrderId:</b> <code>887ccf13-64e2-4112-98ab-8c90b63c41bb</code> (pending_activation)
+                  </div>
                 </div>
-                <span className="when">03:01</span>
               </div>
+
+              {/* ALERT 3: CRCLx Drift Warning */}
               <div className="a">
                 <div className="ic sh">⚠️</div>
                 <div className="tx">
-                  <b>Drift warning — TSLAx</b>
-                  <span>peg 0.974 · −1.3% inside band · monitoring intensified</span>
+                  <div className="alert-head">
+                    <div className="alert-title">
+                      Drift Warning — CRCLx
+                      <span className="alert-tag warn">MONITORING</span>
+                    </div>
+                    <span className="when">02:58</span>
+                  </div>
+                  <div className="alert-meta">
+                    • <b>Deviation:</b> −1.10% inside ±2% band &nbsp;|&nbsp; • <b>Policy:</b> RiskFlagged (Notify Only)
+                  </div>
+                  <div className="alert-reason">
+                    <b>Reasoning:</b> Circle tokenized equity peg drift detected. Asset flagged for intensified 30s surveillance cycle. Automated execution paused pending threshold confirmation.
+                  </div>
                 </div>
-                <span className="when">03:00</span>
               </div>
+
+              {/* ALERT 4: Session Startup */}
               <div className="a">
                 <div className="ic tg">🤖</div>
                 <div className="tx">
-                  <b>Agent session started</b>
-                  <span>LIVE_MAINNET · 3 positions watched · poll 60s · Flash armed</span>
+                  <div className="alert-head">
+                    <div className="alert-title">
+                      Autonomous Risk Agent Initialized
+                      <span className="alert-tag info">AUTONOMOUS LIVE</span>
+                    </div>
+                    <span className="when">22:00</span>
+                  </div>
+                  <div className="alert-meta">
+                    • <b>Network:</b> Base Mainnet (Chain ID 8453) &nbsp;|&nbsp; • <b>Execution:</b> Definitive Flash API (MEV Shield Active)<br/>
+                    • <b>Delegated Wallet:</b> Dynamic MPC Session Signer &nbsp;|&nbsp; • <b>Alert Dispatch:</b> @pegwatchbot (Chat 7825996569)
+                  </div>
                 </div>
-                <span className="when">22:00</span>
               </div>
             </div>
           </div>
