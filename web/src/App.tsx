@@ -1,8 +1,19 @@
 import { useState, useEffect } from 'react';
 import { ExactHomepage } from './components/ExactHomepage';
 import { ExactDashboard } from './components/ExactDashboard';
+import { SplashBannerIntro } from './components/SplashBannerIntro';
 
 export function App() {
+  const [showSplash, setShowSplash] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const hash = window.location.hash.toLowerCase();
+      if (hash.includes('dashboard') || hash.includes('demo')) {
+        return false;
+      }
+    }
+    return true;
+  });
+
   const [page, setPage] = useState<'home' | 'dashboard'>(() => {
     if (typeof window !== 'undefined') {
       const hash = window.location.hash.toLowerCase();
@@ -42,6 +53,9 @@ export function App() {
 
   return (
     <div className="min-h-screen bg-[#0A1218] text-[#F4F7F6]">
+      {showSplash && (
+        <SplashBannerIntro onComplete={() => setShowSplash(false)} />
+      )}
       {page === 'dashboard' ? (
         <ExactDashboard onGoToHome={handleGoToHome} />
       ) : (

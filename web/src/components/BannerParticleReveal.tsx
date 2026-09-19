@@ -150,48 +150,6 @@ export const BannerParticleReveal: React.FC<BannerParticleRevealProps> = ({ imag
 
   return (
     <div style={{ maxWidth: 720, margin: '0 auto', width: '100%', position: 'relative' }}>
-      {/* Cybernetic HUD Frame Header */}
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        marginBottom: 8,
-        padding: '0 4px',
-        fontFamily: "var(--mono, monospace)",
-        fontSize: 11,
-        color: 'var(--dim, #8FA6A0)',
-        letterSpacing: '1px'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-          <span style={{
-            display: 'inline-block',
-            width: 7,
-            height: 7,
-            borderRadius: '50%',
-            background: isAssembled ? 'var(--mint, #00E5A0)' : '#0091FF',
-            boxShadow: isAssembled ? '0 0 8px #00E5A0' : '0 0 8px #0091FF'
-          }}></span>
-          <span>ASSET // PEGWATCH_OFFICIAL_BANNER</span>
-        </div>
-        <button
-          onClick={startParticleAnimation}
-          style={{
-            background: 'rgba(0, 229, 160, 0.08)',
-            border: '1px solid rgba(0, 229, 160, 0.3)',
-            color: 'var(--mint, #00E5A0)',
-            borderRadius: 5,
-            padding: '3px 9px',
-            fontSize: 10.5,
-            cursor: 'pointer',
-            fontFamily: 'var(--mono, monospace)',
-            transition: 'all .2s ease'
-          }}
-          title="Replay particle materialization"
-        >
-          ⚡ Replay Assembly
-        </button>
-      </div>
-
       {/* Main Banner Box with Reduced Frame */}
       <div
         ref={containerRef}
