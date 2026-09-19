@@ -226,13 +226,13 @@ export const ExactDashboard: React.FC<ExactDashboardProps> = ({ onGoToHome }) =>
         /* demo bar */
         .exact-dash-root .demo-bar {
           background:linear-gradient(90deg, rgba(0,229,160,.08), rgba(0,145,255,.08));
-          border-bottom:1px solid var(--line); padding:8px 0; font-size:12px; font-family:var(--mono);
+          border-bottom:1px solid var(--line); padding:12px 0; font-size:12px; font-family:var(--mono);
         }
         .exact-dash-root .demo-bar-inner {
           display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;
         }
         .exact-dash-root .demo-btn {
-          font-family:var(--mono); font-size:11px; padding:4px 10px; border-radius:4px;
+          font-family:var(--mono); font-size:11px; padding:5px 12px; border-radius:5px;
           cursor:pointer; transition:all .15s ease; border:1px solid var(--line);
           background:rgba(18,29,37,.8); color:var(--ink);
         }
@@ -240,7 +240,7 @@ export const ExactDashboard: React.FC<ExactDashboardProps> = ({ onGoToHome }) =>
         .exact-dash-root .demo-btn.primary { background:rgba(0,229,160,.15); border-color:rgba(0,229,160,.4); color:var(--mint); }
 
         /* layout */
-        .exact-dash-root main { padding:22px 0 60px; }
+        .exact-dash-root main { padding:36px 0 60px; }
         .exact-dash-root .grid { display:grid; grid-template-columns:repeat(12,1fr); gap:16px; }
         .exact-dash-root .card { background:var(--panel); border:1px solid var(--line); border-radius:14px; overflow:hidden; }
         .exact-dash-root .card h2 {
@@ -251,7 +251,7 @@ export const ExactDashboard: React.FC<ExactDashboardProps> = ({ onGoToHome }) =>
         .exact-dash-root .card h2 .r { color:var(--mint); font-family:var(--mono); letter-spacing:0; text-transform:none; }
 
         /* stat row */
-        .exact-dash-root .stats { grid-column:span 12; display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
+        .exact-dash-root .stats { grid-column:span 12; display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-top:4px; }
         .exact-dash-root .stat { background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:18px; }
         .exact-dash-root .stat .n { font-family:var(--mono); font-size:26px; font-weight:700; }
         .exact-dash-root .stat .n.g { color:var(--mint); }
