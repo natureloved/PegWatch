@@ -21,6 +21,7 @@ function formatActionType(action: string): string {
 
 function formatStatus(status: string, isSimulated?: boolean): string {
   const clean = status?.replace(/[_\s-]+/g, "").trim().toUpperCase() || "";
+  if (clean.includes("REJECTED")) return "REJECTED (demo)";
   if (clean.includes("SIMULATED") || isSimulated) return "SIMULATED (demo)";
   if (clean.includes("FILLED")) return "Executed on Base";
   if (clean.includes("ARMED")) return "Armed & Active";

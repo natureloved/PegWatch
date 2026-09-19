@@ -10,7 +10,7 @@ export interface FlashOrderExecutionResult {
   orderId: string;
   txHash: string | null;
   explorerUrl: string | null;
-  status: "FILLED" | "SUBMITTED" | "SIMULATED_FILLED" | "SIMULATED";
+  status: "FILLED" | "SUBMITTED" | "SIMULATED_FILLED" | "SIMULATED" | "REJECTED";
   targetQty: number;
   notionalUsd: number;
   isSimulated: boolean;
@@ -132,12 +132,13 @@ export class DefinitiveFlashClient {
           if (submitRes.ok) {
             const orderData = (await submitRes.json()) as any;
             const orderId = orderData.orderId || quoteData.quoteId;
-            const txHash = orderData.txHash || "0x" + Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join("");
-            console.log(`[FLASH ORDER SUBMITTED] Order ID: ${orderId}`);
+            const txHash = orderData.txHash || null;
+            const explorerUrl = txHash ? `https://basescan.org/tx/${txHash}` : null;
+            console.log(`[FLASH ORDER SUBMITTED] Order ID: ${orderId}${txHash ? ` Tx: ${txHash}` : ""}`);
             return {
               orderId,
               txHash,
-              explorerUrl: `https://basescan.org/tx/${txHash}`,
+              explorerUrl,
               status: "SUBMITTED",
               targetQty: qty,
               notionalUsd: parseFloat((qty * triggerPriceUsd).toFixed(2)),
@@ -147,20 +148,18 @@ export class DefinitiveFlashClient {
           } else {
             const errBody = await submitRes.text();
             console.warn(`[FLASH] Order submission response (${submitRes.status}): ${errBody}`);
-            // In demo environments without funded NVDAc test balance, return quote & signature receipt
             return {
               orderId: quoteData.quoteId,
-              txHash: "0x" + Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join(""),
-              explorerUrl: `https://basescan.org/address/${funderAddress}`,
-              status: "SUBMITTED",
+              txHash: null,
+              explorerUrl: null,
+              status: "REJECTED",
               targetQty: qty,
               notionalUsd: parseFloat((qty * triggerPriceUsd).toFixed(2)),
               isSimulated: true,
               rawPayload: {
                 quoteId: quoteData.quoteId,
                 userSignature,
-                triggers: quotePayload.triggers,
-                note: "Verified live quote & EIP-712 signature against Flash Base relayer"
+                note: `Live quote & signature verified; submission rejected: ${errBody.slice(0, 200)}`
               }
             };
           }
@@ -199,13 +198,12 @@ export class DefinitiveFlashClient {
     };
 
     const signature = await this.signer.signFlashTypedData(demoTypedData);
-    const mockTxHash = `0x` + Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join("");
 
     return {
       orderId: demoQuoteId,
-      txHash: mockTxHash,
-      explorerUrl: `https://basescan.org/tx/${mockTxHash}`,
-      status: "SIMULATED_FILLED",
+      txHash: null,
+      explorerUrl: null,
+      status: "SIMULATED",
       targetQty: qty,
       notionalUsd: parseFloat((qty * triggerPriceUsd).toFixed(2)),
       isSimulated: true,
