@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { BannerParticleReveal } from './BannerParticleReveal';
 
 interface ExactHomepageProps {
   onGoToDashboard: () => void;
@@ -569,16 +570,13 @@ export const ExactHomepage: React.FC<ExactHomepageProps> = ({ onGoToDashboard })
         </div>
       </section>
 
-      {/* OFFICIAL BANNER SHOWCASE */}
+      {/* OFFICIAL BANNER SHOWCASE WITH PARTICLE MATERIALIZATION */}
       <section style={{ padding: '30px 0 60px' }}>
         <div className="wrap">
-          <div className="banner-container">
-            <img
-              src="/banner.jpg"
-              alt="PegWatch — Autonomous Risk Agent for Tokenized Equities"
-              style={{ width: '100%', height: 'auto', display: 'block' }}
-            />
-          </div>
+          <BannerParticleReveal
+            imageSrc="/banner.jpg"
+            altText="PegWatch — Autonomous Risk Agent for Tokenized Equities"
+          />
         </div>
       </section>
 
