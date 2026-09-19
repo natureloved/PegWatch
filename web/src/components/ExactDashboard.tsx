@@ -154,21 +154,7 @@ export const ExactDashboard: React.FC<ExactDashboardProps> = ({ onGoToHome }) =>
       <header>
         <div className="wrap nav">
           <div className="brand" onClick={onGoToHome}>
-            <svg viewBox="0 0 512 512" style={{ width: 30, height: 30 }}>
-              <defs>
-                <linearGradient id="exactDashShieldGrad" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0" stopColor="#00E5A0"/>
-                  <stop offset="1" stopColor="#0091FF"/>
-                </linearGradient>
-              </defs>
-              <path d="M256 40 L432 104 V268 C432 376 356 446 256 476 C156 446 80 376 80 268 V104 Z"
-                    fill="none" stroke="url(#exactDashShieldGrad)" strokeWidth="22" strokeLinejoin="round"/>
-              <line x1="140" y1="212" x2="372" y2="212" stroke="#00E5A0" strokeWidth="14" strokeLinecap="round"/>
-              <line x1="140" y1="300" x2="372" y2="300" stroke="#0091FF" strokeWidth="14" strokeLinecap="round"/>
-              <path d="M150 256 C185 220 215 292 250 256 C280 226 300 190 330 172"
-                    fill="none" stroke="#F4F7F6" strokeWidth="16" strokeLinecap="round"/>
-              <circle cx="330" cy="172" r="18" fill="#FF5470"/>
-            </svg>
+            <img src="/logo.png" alt="PegWatch" style={{ width: 30, height: 30, objectFit: 'contain' }} />
             <b>Peg<i>Watch</i></b>
           </div>
           <span className="mode-tag">AUTONOMOUS=<b>LIVE</b></span>

@@ -1,7 +1,11 @@
-# PegWatch 🛡️
+<p align="center">
+  <img src="assets/banner.jpg" alt="PegWatch — Autonomous Risk Agent for Tokenized Equities on Base" width="100%" />
+</p>
+
+# PegWatch <img src="assets/logo.png" alt="PegWatch Logo" width="34" align="center" />
 > **Autonomous Risk Agent for Tokenized Equities on Base**  
 > *Built for the Runtime Hackathon (NYC + Online, Sep 13–19, 2026)*  
-> **Tracks:** Bankr (Automatic) • Definitive Flash • Dynamic Delegated Access
+> **Tracks:** Definitive Flash • Dynamic Delegated Access • Base
 
 ---
 
