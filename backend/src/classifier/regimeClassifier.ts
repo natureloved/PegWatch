@@ -157,4 +157,8 @@ export class RegimeClassifier {
     this.consecutiveBreaches = 0;
     this.isCurrentlyInBreachState = false;
   }
+
+  public armForBreach(): void {
+    this.consecutiveBreaches = Math.max(this.consecutiveBreaches, DEFAULT_RISK_CONFIG.consecutiveBreachesRequired - 1);
+  }
 }

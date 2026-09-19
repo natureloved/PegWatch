@@ -96,6 +96,10 @@ app.post(["/api/demo/inject-drift", "/api/agent/inject-drift"], async (req, res)
     agent.priceFeed.injectDrift(driftPct, reason || "Hackathon Demo Injection");
     console.log(`[DEMO] Injected drift: ${driftPct}% (${reason || "Demo"})`);
 
+    // Reset cooldown & breach counter so demo injection immediately triggers autonomous execution
+    agent.policy.resetCooldown();
+    agent.classifier.armForBreach();
+
     // Trigger immediate agent step for responsive demonstration
     await agent.step();
 
@@ -116,6 +120,7 @@ app.post(["/api/demo/reset-drift", "/api/agent/reset-drift"], async (req, res) =
   try {
     agent.priceFeed.resetDrift();
     agent.classifier.reset();
+    agent.policy.resetCooldown();
     console.log("[DEMO] Reset simulated drift. Reverting to live market prices.");
 
     await agent.step();

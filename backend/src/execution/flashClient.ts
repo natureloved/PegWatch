@@ -41,26 +41,24 @@ export class DefinitiveFlashClient {
     if (this.apiKey) {
       try {
         const quotePayload: any = {
-          funder: funderAddress,
           targetAsset: ASSETS.NVDAC.address,
+          contraAsset: ASSETS.USDC.address,
+          targetChain: "base",
+          contraChain: "base",
+          side: "sell",
+          qty: qty.toString(),
           orderType: orderType,
-          targetQty: qty.toString(),
-          chainId: "8453",
-          slippage: "0.01",
+          funderAddress: funderAddress,
         };
 
         if (orderType === "stop-loss") {
           quotePayload.triggers = [
             {
-              type: "PRICE",
-              operator: "<=",
-              value: triggerPriceUsd.toFixed(2),
+              notionalPrice: triggerPriceUsd.toFixed(2),
+              triggerType: "lower",
             },
           ];
         }
-
-        quotePayload.maxSlippage = "0.01";
-        quotePayload.allowance = "500.00";
 
         console.log(`[FLASH] Requesting quote from Definitive Flash API for ${qty} NVDAc (${orderType})...`);
         const quoteRes = await fetch(`${FLASH_API_BASE_URL}/quote`, {
@@ -163,6 +161,9 @@ export class DefinitiveFlashClient {
               }
             };
           }
+        } else {
+          const errBody = await quoteRes.text();
+          console.warn(`[FLASH] Quote request failed (${quoteRes.status}): ${errBody}`);
         }
       } catch (err: any) {
         console.warn(`[FLASH] Live Flash API submission failed: ${err.message}. Falling back to demo receipt.`);

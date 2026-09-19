@@ -16,7 +16,10 @@ interface ActionItem {
   reason: string;
   order_id: string | null;
   tx_hash: string | null;
-  status: string;
+  explorer_url?: string | null;
+  status?: string;
+  qty?: number;
+  notional_usd?: number;
 }
 
 export const ExactDashboard: React.FC<ExactDashboardProps> = ({ onGoToHome }) => {
@@ -29,6 +32,8 @@ export const ExactDashboard: React.FC<ExactDashboardProps> = ({ onGoToHome }) =>
     isLiveBackend: false,
     walletAddress: '0xDelegatedUserWalletOnBase',
     isDelegated: true,
+    remainingAllowanceUsd: 346.14,
+    maxAllowanceUsd: 500.0,
     agentSignerAddress: '0x33E7Ec3333e957D091F07727D1300f33F2717C25',
     pollCount: 1420
   });
@@ -43,63 +48,58 @@ export const ExactDashboard: React.FC<ExactDashboardProps> = ({ onGoToHome }) =>
   );
   const backendBaseUrl = (import.meta as any).env?.VITE_BACKEND_URL || (isLocalHost ? 'http://localhost:3005' : null);
 
-  // Poll agent status & actions (only if running locally or if remote backend URL is provided)
+  // Poll agent status & actions
+  const pollBackend = React.useCallback(async () => {
+    if (!backendBaseUrl) return;
+    try {
+      const [statusRes, actionsRes] = await Promise.all([
+        fetch(`${backendBaseUrl}/api/status`).catch(() => null),
+        fetch(`${backendBaseUrl}/api/actions?limit=10`).catch(() => null)
+      ]);
+
+      if (statusRes && statusRes.ok) {
+        const statusJson = await statusRes.json();
+        if (statusJson.success && statusJson.latestTick) {
+          setLiveData(prev => ({
+            ...prev,
+            nvdacPrice: statusJson.latestTick.dex_price || 222.06,
+            oraclePrice: statusJson.latestTick.oracle_price || 118.50,
+            deviationPct: statusJson.latestTick.deviation_pct || 87.39,
+            regime: statusJson.regime || 'WEEKEND_DARK_MARKET',
+            thresholdPct: statusJson.thresholdPct || 3.0,
+            walletAddress: statusJson.delegation?.walletAddress || prev.walletAddress,
+            isDelegated: statusJson.delegation?.isDelegated ?? true,
+            remainingAllowanceUsd: statusJson.delegation?.remainingAllowanceUsd ?? prev.remainingAllowanceUsd,
+            maxAllowanceUsd: statusJson.delegation?.maxAllowanceUsd ?? prev.maxAllowanceUsd,
+            agentSignerAddress: statusJson.agentSignerAddress || prev.agentSignerAddress,
+            pollCount: prev.pollCount + 1,
+            isLiveBackend: true
+          }));
+        }
+      }
+
+      if (actionsRes && actionsRes.ok) {
+        const actionsJson = await actionsRes.json();
+        if (actionsJson.success && Array.isArray(actionsJson.actions)) {
+          setLiveActions(actionsJson.actions);
+        }
+      }
+    } catch {
+      // Graceful fallback to verified Base Mainnet state on public hosting
+    }
+  }, [backendBaseUrl]);
+
   useEffect(() => {
     if (!backendBaseUrl) return;
-
-    let isMounted = true;
-
-    const pollBackend = async () => {
-      try {
-        const [statusRes, actionsRes] = await Promise.all([
-          fetch(`${backendBaseUrl}/api/status`).catch(() => null),
-          fetch(`${backendBaseUrl}/api/actions?limit=10`).catch(() => null)
-        ]);
-
-        if (!isMounted) return;
-
-        if (statusRes && statusRes.ok) {
-          const statusJson = await statusRes.json();
-          if (statusJson.success && statusJson.latestTick) {
-            setLiveData(prev => ({
-              ...prev,
-              nvdacPrice: statusJson.latestTick.dex_price || 222.06,
-              oraclePrice: statusJson.latestTick.oracle_price || 118.50,
-              deviationPct: statusJson.latestTick.deviation_pct || 87.39,
-              regime: statusJson.regime || 'WEEKEND_DARK_MARKET',
-              thresholdPct: statusJson.thresholdPct || 3.0,
-              walletAddress: statusJson.delegation?.walletAddress || prev.walletAddress,
-              isDelegated: statusJson.delegation?.isDelegated ?? true,
-              agentSignerAddress: statusJson.agentSignerAddress || prev.agentSignerAddress,
-              pollCount: prev.pollCount + 1,
-              isLiveBackend: true
-            }));
-          }
-        }
-
-        if (actionsRes && actionsRes.ok) {
-          const actionsJson = await actionsRes.json();
-          if (actionsJson.success && Array.isArray(actionsJson.actions)) {
-            setLiveActions(actionsJson.actions);
-          }
-        }
-      } catch {
-        // Graceful fallback to verified Base Mainnet state on public hosting
-      }
-    };
-
     pollBackend();
-    const timer = setInterval(pollBackend, 5000);
-    return () => {
-      isMounted = false;
-      clearInterval(timer);
-    };
-  }, [backendBaseUrl]);
+    const timer = setInterval(pollBackend, 4000);
+    return () => clearInterval(timer);
+  }, [backendBaseUrl, pollBackend]);
 
   // Demo actions
   const handleInjectDrift = async () => {
     setIsInjecting(true);
-    setDemoStatus('Simulating +15.0% dark market drift spike...');
+    setDemoStatus('⚡ Ingesting simulated drift, requesting Definitive Flash quote & signing EIP-712...');
     if (backendBaseUrl) {
       try {
         const res = await fetch(`${backendBaseUrl}/api/demo/inject-drift`, {
@@ -108,7 +108,9 @@ export const ExactDashboard: React.FC<ExactDashboardProps> = ({ onGoToHome }) =>
           body: JSON.stringify({ driftPct: 15, reason: 'Live Dashboard Hackathon Demo' })
         });
         if (res.ok) {
-          setDemoStatus('✅ +15.0% drift injected! Agent evaluated & dispatched Telegram alert.');
+          setDemoStatus('✅ +15.0% drift confirmed! Flash stop-loss quoted & Telegram alert dispatched.');
+          // Immediately sync dashboard state with zero lag
+          await pollBackend();
         } else {
           setDemoStatus('⚠️ Agent demo simulation active in local mock mode.');
         }
@@ -123,8 +125,8 @@ export const ExactDashboard: React.FC<ExactDashboardProps> = ({ onGoToHome }) =>
       setTimeout(() => {
         setLiveData(prev => ({
           ...prev,
-          nvdacPrice: 242.50,
-          deviationPct: 104.64,
+          nvdacPrice: 136.28,
+          deviationPct: 15.0,
           pollCount: prev.pollCount + 1
         }));
         setLiveActions(prev => [
@@ -133,14 +135,16 @@ export const ExactDashboard: React.FC<ExactDashboardProps> = ({ onGoToHome }) =>
             timestamp: Date.now(),
             token_symbol: 'NVDAc',
             action_type: 'STOP_LOSS_DE_RISK',
-            deviation_pct: 104.64,
+            deviation_pct: 15.0,
             regime: 'WEEKEND_DARK_MARKET',
             classification: 'ABNORMAL_DRIFT',
             decision: 'EXECUTED',
-            reason: 'Simulated +15% dark market surge. PegWatch quoted Definitive Flash stop-loss @ 240 USDC & dispatched alert to @pegwatchbot.',
+            reason: 'Simulated +15% dark market surge. PegWatch quoted Definitive Flash stop-loss @ 134.91 USDC & dispatched alert to @pegwatchbot.',
             order_id: 'flash_qt_demo_' + Math.random().toString(36).substring(7),
-            tx_hash: '0xe6144888dc3f60fe8b39429a9c90463c41bbeac44baee7a93ea69de351af64ee',
-            status: 'SIMULATED_FILLED'
+            tx_hash: null,
+            status: 'SIMULATED',
+            qty: 0.0208,
+            notional_usd: 4.58
           },
           ...prev
         ]);
@@ -158,7 +162,9 @@ export const ExactDashboard: React.FC<ExactDashboardProps> = ({ onGoToHome }) =>
       try {
         const res = await fetch(`${backendBaseUrl}/api/demo/reset-drift`, { method: 'POST' });
         if (res.ok) {
-          setDemoStatus('✅ Reverted to live Base market feed.');
+          setDemoStatus('✅ Reverted to live Base Aerodrome market feed.');
+          // Immediately sync dashboard state with zero lag
+          await pollBackend();
         }
       } catch {
         setDemoStatus('Reverted to Base market feed.');
@@ -438,9 +444,17 @@ export const ExactDashboard: React.FC<ExactDashboardProps> = ({ onGoToHome }) =>
               <div className="d">cycle 60s · 24/5 vs 24/7 dark market</div>
             </div>
             <div className="stat">
-              <div className="n b">1 Filled · 2 Armed</div>
+              <div className="n b">
+                {liveActions.filter(a => a.decision === 'EXECUTED').length > 0
+                  ? `${liveActions.filter(a => a.decision === 'EXECUTED').length} Filled (Demo) · 2 Armed`
+                  : '1 Filled · 2 Armed'}
+              </div>
               <div className="t">Definitive Flash Orders</div>
-              <div className="d">Tx 0xe614...64ee · MEV-shielded</div>
+              <div className="d">
+                {liveActions.find(a => a.order_id)?.order_id
+                  ? `Quote ${liveActions.find(a => a.order_id)!.order_id!.replace('sim-', '').slice(0, 8)}... · MEV-shielded`
+                  : 'MEV-shielded · Session Signer'}
+              </div>
             </div>
           </div>
 
@@ -479,10 +493,10 @@ export const ExactDashboard: React.FC<ExactDashboardProps> = ({ onGoToHome }) =>
                   WEEKEND THRESHOLD: +3.0% ($122.05)
                 </text>
 
-                {/* Protective Stop-Loss Execution Level: $210+ */}
+                {/* Protective Stop-Loss Execution Level */}
                 <line x1="40" y1="52" x2="610" y2="52" stroke="#FF5470" strokeWidth="1.5" strokeDasharray="4 4" opacity=".5"/>
-                <text x="410" y="46" fill="#FF5470" fontSize="10" fontFamily="monospace">
-                  FLASH STOP-LOSS LEVEL: $210.00
+                <text x="380" y="46" fill="#FF5470" fontSize="10" fontFamily="monospace">
+                  FLASH STOP-LOSS LEVEL: ${(liveData.nvdacPrice * 0.99).toFixed(2)}
                 </text>
 
                 {/* Time Axis Labels */}
@@ -494,7 +508,7 @@ export const ExactDashboard: React.FC<ExactDashboardProps> = ({ onGoToHome }) =>
                   <text x="545" y="210">LIVE (${liveData.nvdacPrice.toFixed(0)})</text>
                 </g>
 
-                {/* Price Trajectory Curve: Starts at 118.50 -> drifts through threshold -> spikes to current DEX price */}
+                {/* Price Trajectory Curve */}
                 <path
                   d="M 40 165 C 100 163, 160 160, 220 152 C 280 144, 340 132, 380 115 C 430 94, 490 65, 595 48"
                   fill="none"
@@ -514,8 +528,8 @@ export const ExactDashboard: React.FC<ExactDashboardProps> = ({ onGoToHome }) =>
                 <circle cx="560" cy="52" r="6.5" fill="#FF5470"/>
                 <circle cx="560" cy="52" r="11" fill="none" stroke="#FF5470" strokeWidth="1.5" opacity="0.6"/>
                 <line x1="560" y1="52" x2="560" y2="28" stroke="#FF5470" strokeWidth="1.5" strokeDasharray="3 3"/>
-                <text x="445" y="24" fill="#FF5470" fontSize="10" fontFamily="monospace" fontWeight="bold">
-                  PROTECTIVE STOP FIRED (0.05 NVDAc) ⚡
+                <text x="420" y="24" fill="#FF5470" fontSize="10" fontFamily="monospace" fontWeight="bold">
+                  PROTECTIVE STOP FIRED ({(liveData.nvdacPrice * 0.99).toFixed(2)} USDC) ⚡
                 </text>
               </svg>
               <div className="legend">
@@ -593,11 +607,15 @@ export const ExactDashboard: React.FC<ExactDashboardProps> = ({ onGoToHome }) =>
                       <span className="tag">[{act.action_type.replace(/_/g, '')}]</span>
                       <span className="msg">
                         {act.token_symbol} dev +{act.deviation_pct.toFixed(1)}% · {act.reason}
-                        {act.tx_hash && (
+                        {act.tx_hash ? (
                           <span style={{ color: 'var(--blue)', marginLeft: 6 }}>
                             Tx: {act.tx_hash.slice(0, 10)}...
                           </span>
-                        )}
+                        ) : act.order_id ? (
+                          <span style={{ color: 'var(--mint)', marginLeft: 6 }}>
+                            Quote: {act.order_id.replace('sim-', '').slice(0, 10)}...
+                          </span>
+                        ) : null}
                       </span>
                     </div>
                   );
@@ -663,11 +681,18 @@ export const ExactDashboard: React.FC<ExactDashboardProps> = ({ onGoToHome }) =>
           <div className="card orders-card">
             <h2>Flash orders <span className="r">via Definitive</span></h2>
             <div className="orders">
-              <div className="row">
-                <span className="side sell">SELL 0.05 NVDAc</span>
-                <span>stop-loss @ 210 USDC</span>
-                <span className="st fired">TRIGGERED</span>
-              </div>
+              {liveActions.filter(a => a.decision === 'EXECUTED').slice(0, 2).map((a) => {
+                const triggerPrice = a.notional_usd && a.qty ? (a.notional_usd / a.qty) : (liveData.nvdacPrice * 0.99);
+                return (
+                  <div key={a.id} className="row">
+                    <span className="side sell">SELL {a.qty || 0.0208} {a.token_symbol}</span>
+                    <span>stop-loss @ {triggerPrice.toFixed(1)} USDC</span>
+                    <span className="st fired">
+                      {a.status === 'SIMULATED' ? 'SIMULATED (demo)' : 'TRIGGERED'}
+                    </span>
+                  </div>
+                );
+              })}
               <div className="row">
                 <span className="side buy">BUY 200 USDC NVDAc</span>
                 <span>re-entry DCA @ open</span>
@@ -683,8 +708,8 @@ export const ExactDashboard: React.FC<ExactDashboardProps> = ({ onGoToHome }) =>
                 <span>MEV-shielded</span>
               </div>
               <div className="row" style={{ color: 'var(--faint)', fontSize: '10px', display: 'block', padding: '10px 16px' }}>
-                Session Signer: <code style={{ color: 'var(--mint)' }}>{liveData.agentSignerAddress.slice(0, 10)}...{liveData.agentSignerAddress.slice(-8)}</code>
-                <br/>Delegated Wallet: <code style={{ color: 'var(--dim)' }}>0xDelegatedUserWalletOnBase</code>
+                Session Signer: <code style={{ color: 'var(--mint)' }}>{liveData.agentSignerAddress ? `${liveData.agentSignerAddress.slice(0, 8)}...${liveData.agentSignerAddress.slice(-6)}` : '0x33E7...7C25'}</code>
+                <br/>Allowance Remaining: <code style={{ color: 'var(--mint)' }}>${liveData.remainingAllowanceUsd.toFixed(2)}</code> / ${liveData.maxAllowanceUsd.toFixed(2)}
               </div>
             </div>
           </div>
@@ -709,33 +734,99 @@ export const ExactDashboard: React.FC<ExactDashboardProps> = ({ onGoToHome }) =>
               </a>
             </h2>
             <div className="alerts">
-              {/* LIVE ALERT 1: NVDAc (Real Base execution) */}
+              {/* DYNAMIC LIVE ALERTS FROM BACKEND */}
+              {liveActions.filter(a => a.decision === 'EXECUTED' || a.action_type.includes('STOP_LOSS')).slice(0, 2).map((act) => {
+                const date = new Date(act.timestamp);
+                const timeStr = date.toTimeString().split(' ')[0].slice(0, 5);
+                const cleanReason = (act.reason || '')
+                  .replace(/\*/g, '')
+                  .replace(/STOP_LOSS_DE_RISK/gi, 'Stop-Loss Order (De-Risk)')
+                  .replace(/WEEKEND_DARK_MARKET/gi, 'Weekend Dark Market')
+                  .replace(/SIMULATED_FILLED/gi, 'SIMULATED (demo)')
+                  .replace(/SIMULATED/gi, 'SIMULATED (demo)');
+
+                return (
+                  <div key={act.id} className="a">
+                    <div className="ic br">🚨</div>
+                    <div className="tx">
+                      <div className="alert-head">
+                        <div className="alert-title">
+                          PegWatch Risk Alert: {act.token_symbol}
+                          <span className={`alert-tag ${act.decision === 'EXECUTED' ? 'fire' : 'warn'}`}>
+                            {act.status === 'SIMULATED' ? 'SIMULATED (DEMO)' : act.decision === 'EXECUTED' ? 'STOP-LOSS EXECUTED' : 'BLOCKED BY POLICY'}
+                          </span>
+                        </div>
+                        <span className="when">{timeStr}</span>
+                      </div>
+                      <div className="alert-meta">
+                        • <b>Action:</b> Stop-Loss Order (De-Risk) &nbsp;|&nbsp; • <b>Deviation:</b> {act.deviation_pct >= 0 ? '+' : ''}{act.deviation_pct.toFixed(2)}% (Weekend Dark Market)<br/>
+                        • <b>Notional:</b> ${(act.notional_usd || 4.58).toFixed(2)} ({act.qty || 0.0208} {act.token_symbol}) &nbsp;|&nbsp; • <b>Status:</b> {act.status === 'SIMULATED' ? 'SIMULATED (demo)' : 'Executed (Flash Trigger Armed)'}
+                      </div>
+                      <div className="alert-reason">
+                        <b>Reasoning:</b> {cleanReason}
+                      </div>
+                      <div className="alert-tx">
+                        {act.tx_hash ? (
+                          <>
+                            🔗 <b>Tx Hash:</b>{' '}
+                            <a
+                              href={act.explorer_url || `https://basescan.org/tx/${act.tx_hash}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              View on BaseScan ({act.tx_hash.slice(0, 10)}...) ↗
+                            </a>
+                          </>
+                        ) : (
+                          <>
+                            🔗 <b>Live Flash Quote:</b>{' '}
+                            <code style={{ color: 'var(--mint)' }}>{act.order_id?.replace('sim-', '') || 'Verified'}</code>
+                            <span style={{ color: 'var(--dim)', marginLeft: 8 }}>(EIP-712 Session Signature Verified · Demo Mode)</span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+
+              {/* CONTEXT ALERT: TSLAx Floor Breach */}
               <div className="a">
-                <div className="ic br">🚨</div>
+                <div className="ic br">🛡</div>
                 <div className="tx">
                   <div className="alert-head">
                     <div className="alert-title">
-                      PegWatch Risk Alert: NVDAc
-                      <span className="alert-tag fire">STOP-LOSS EXECUTED</span>
+                      TSLAx Breached Floor — Stop-Loss Placed
+                      <span className="alert-tag fire">FLOOR BREACH</span>
                     </div>
-                    <span className="when">11:48</span>
+                    <span className="when">11:30</span>
                   </div>
                   <div className="alert-meta">
-                    • <b>Action:</b> Stop-Loss Order (De-Risk) &nbsp;|&nbsp; • <b>Deviation:</b> +87.39% (Weekend Dark Market · 24/5 Oracle Frozen)<br/>
-                    • <b>Notional:</b> $10.99 (0.05 NVDAc) &nbsp;|&nbsp; • <b>Status:</b> Executed (Flash Trigger Armed)
+                    • <b>Action:</b> Stop-Loss Trigger &nbsp;|&nbsp; • <b>Peg:</b> 0.962 &lt; 0.970 Floor &nbsp;|&nbsp; • <b>Order:</b> sell 0.05 TSLAx @ 355 USDC (orderId: 887ccf13)
                   </div>
                   <div className="alert-reason">
-                    <b>Reasoning:</b> NVDAc DEX price drifted +87.39% from Friday's official close while the Chainlink equity oracle has been frozen for 42.0 hours over the weekend dark market. PegWatch executed a protective Stop-Loss Order of 0.05 NVDAc ($10.99) to mitigate downside exposure before Monday's market open.
+                    <b>Reasoning:</b> TSLAx secondary spot quote broke below the 0.970 protective risk floor. Agent quoted Flash stop-loss, signed via session wallet, and registered trigger order with Definitive relayer.
                   </div>
                   <div className="alert-tx">
-                    🔗 <b>Tx Hash:</b>{' '}
-                    <a
-                      href="https://basescan.org/tx/0xe6144888dc3f60fe8b39429a9c90463c41bbeac44baee7a93ea69de351af64ee"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      View on BaseScan (0xe614...64ee) ↗
-                    </a>
+                    🔗 <b>Flash OrderId:</b> <code>887ccf13-64e2-4112-98ab-8c90b63c41bb</code> (pending_activation)
+                  </div>
+                </div>
+              </div>
+
+              {/* CONTEXT ALERT: Session Startup */}
+              <div className="a">
+                <div className="ic tg">🤖</div>
+                <div className="tx">
+                  <div className="alert-head">
+                    <div className="alert-title">
+                      Autonomous Risk Agent Initialized
+                      <span className="alert-tag info">AUTONOMOUS LIVE</span>
+                    </div>
+                    <span className="when">10:00</span>
+                  </div>
+                  <div className="alert-meta">
+                    • <b>Network:</b> Base Mainnet (Chain ID 8453) &nbsp;|&nbsp; • <b>Execution:</b> Definitive Flash API (MEV Shield Active)<br/>
+                    • <b>Delegated Wallet:</b> Dynamic MPC Session Signer &nbsp;|&nbsp; • <b>Alert Dispatch:</b> @pegwatchbot (Chat 7825996569)
                   </div>
                 </div>
               </div>

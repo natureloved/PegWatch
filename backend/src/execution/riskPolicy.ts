@@ -86,4 +86,8 @@ export class RiskPolicyEngine {
   public getLastActionTimestamp(): number {
     return this.lastActionTimestamp;
   }
+
+  public resetCooldown(): void {
+    this.lastActionTimestamp = 0;
+  }
 }

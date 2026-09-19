@@ -12,7 +12,7 @@
     "smoke:wallet": "tsx scripts/smoke/smoke-wallet.ts",
     "smoke:llm": "tsx scripts/smoke/smoke-llm.ts",
     "smoke:all": "tsx scripts/smoke/smoke-price.ts && tsx scripts/smoke/smoke-flash-quote.ts && tsx scripts/smoke/smoke-wallet.ts && tsx scripts/smoke/smoke-llm.ts",
-    "dev:server": "tsx backend/src/server.ts",
+    "dev:server": "tsx watch backend/src/server.ts",
     "dev:agent": "tsx backend/src/agent.ts",
     "dev:ui": "npm --prefix frontend run dev",
     "build:ui": "npm --prefix frontend run build",
