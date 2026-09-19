@@ -8,9 +8,9 @@ import { getAddress } from "viem";
 
 export interface FlashOrderExecutionResult {
   orderId: string;
-  txHash: string;
-  explorerUrl: string;
-  status: "FILLED" | "SUBMITTED" | "SIMULATED_FILLED";
+  txHash: string | null;
+  explorerUrl: string | null;
+  status: "FILLED" | "SUBMITTED" | "SIMULATED_FILLED" | "SIMULATED";
   targetQty: number;
   notionalUsd: number;
   isSimulated: boolean;
@@ -33,34 +33,35 @@ export class DefinitiveFlashClient {
     qty: number,
     triggerPriceUsd: number,
     orderType: "stop-loss" | "market" = "stop-loss",
-    isSimulated: boolean = false
+    isSimulated: boolean = false,
+    funderOverride?: string
   ): Promise<FlashOrderExecutionResult> {
-    const funderAddress = this.signer.address;
-
-    const quotePayload: any = {
-      targetAsset: ASSETS.NVDAC.address,
-      contraAsset: ASSETS.USDC.address,
-      targetChain: "base",
-      contraChain: "base",
-      side: "sell",
-      qty: qty.toString(),
-      orderType: orderType,
-      funderAddress: funderAddress,
-    };
-
-    if (orderType === "stop-loss") {
-      quotePayload.triggers = [
-        {
-          notionalPrice: triggerPriceUsd.toFixed(2),
-          triggerType: "lower",
-        },
-      ];
-    } else {
-      quotePayload.maxSlippage = "0.01";
-    }
+    const funderAddress = funderOverride || this.signer.address;
 
     if (this.apiKey) {
       try {
+        const quotePayload: any = {
+          funder: funderAddress,
+          targetAsset: ASSETS.NVDAC.address,
+          orderType: orderType,
+          targetQty: qty.toString(),
+          chainId: "8453",
+          slippage: "0.01",
+        };
+
+        if (orderType === "stop-loss") {
+          quotePayload.triggers = [
+            {
+              type: "PRICE",
+              operator: "<=",
+              value: triggerPriceUsd.toFixed(2),
+            },
+          ];
+        }
+
+        quotePayload.maxSlippage = "0.01";
+        quotePayload.allowance = "500.00";
+
         console.log(`[FLASH] Requesting quote from Definitive Flash API for ${qty} NVDAc (${orderType})...`);
         const quoteRes = await fetch(`${FLASH_API_BASE_URL}/quote`, {
           method: "POST",
@@ -89,6 +90,26 @@ export class DefinitiveFlashClient {
 
             userSignature = await this.signer.signFlashTypedData(parsedTypedData);
             console.log(`[FLASH] Successfully signed EIP-712 order typed data: ${userSignature.slice(0, 18)}...`);
+          }
+
+          if (process.env.DEMO_MODE === "true") {
+            // DEMO: stop after live quote + EIP-712 signature. No live order submission.
+            console.log(`[FLASH DEMO] Live quote obtained (${quoteData.quoteId}) & EIP-712 session signature verified. Halting before onchain order submission.`);
+            return {
+              orderId: `sim-${quoteData.quoteId}`,
+              txHash: null,
+              explorerUrl: null,
+              status: "SIMULATED",
+              targetQty: qty,
+              notionalUsd: parseFloat((qty * triggerPriceUsd).toFixed(2)),
+              isSimulated: true,
+              rawPayload: {
+                quoteId: quoteData.quoteId,
+                userSignature,
+                triggers: quotePayload.triggers,
+                note: "Demo mode: live quote + EIP-712 signature verified without live submission"
+              }
+            };
           }
 
           // Submit order with full required parameters echoed

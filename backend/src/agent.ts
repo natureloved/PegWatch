@@ -136,7 +136,7 @@ export class PegWatchAgent {
         this.policy.recordAction(execResult.notionalUsd);
         await this.notifier.sendAlert(action);
 
-        console.log(`[AGENT SUCCESS] Action recorded in ledger. Tx: ${execResult.txHash}`);
+        console.log(`[AGENT ${execResult.status === "SIMULATED" ? "SIMULATED" : "SUCCESS"}] Order recorded${execResult.txHash ? `. Tx: ${execResult.txHash}` : " (DEMO_MODE — no live submission)"}`);
       }
     } catch (err: any) {
       console.error(`[AGENT ERROR] Step execution failed: ${err.message || err}`);

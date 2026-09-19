@@ -19,9 +19,9 @@ function formatActionType(action: string): string {
   return action?.replace(/_/g, " ") || "Risk Mitigation Order";
 }
 
-function formatStatus(status: string): string {
+function formatStatus(status: string, isSimulated?: boolean): string {
   const clean = status?.replace(/[_\s-]+/g, "").trim().toUpperCase() || "";
-  if (clean.includes("SIMULATED")) return "Executed (Flash Trigger Armed)";
+  if (clean.includes("SIMULATED") || isSimulated) return "SIMULATED (demo)";
   if (clean.includes("FILLED")) return "Executed on Base";
   if (clean.includes("ARMED")) return "Armed & Active";
   if (clean.includes("PENDING")) return "Pending Activation";
@@ -41,17 +41,22 @@ export class AlertNotifier {
     const formattedDeviation = `${action.deviation_pct >= 0 ? "+" : ""}${action.deviation_pct.toFixed(2)}%`;
     const regimeStr = formatRegime(action.regime);
     const actionStr = formatActionType(action.action_type);
-    const statusStr = formatStatus(action.status);
-    const explorerLink = action.explorer_url
+    const statusStr = formatStatus(action.status, action.is_simulated === 1);
+    const explorerLink = action.tx_hash && action.explorer_url
       ? `<a href="${action.explorer_url}">View on BaseScan</a>`
-      : "Confirmed on Base";
+      : "Verified EIP-712 Session Signature (Demo Mode)";
+
+    const receiptLine = action.tx_hash
+      ? `🔗 <b>Tx Hash:</b> ${explorerLink}`
+      : `🔗 <b>Receipt:</b> ${explorerLink}`;
 
     // Sanitize any potential asterisks and format enum occurrences in reason
     const cleanReason = (action.reason || "")
       .replace(/\*/g, "")
       .replace(/STOP_LOSS_DE_RISK/gi, "Stop-Loss Order (De-Risk)")
       .replace(/WEEKEND_DARK_MARKET/gi, "Weekend Dark Market")
-      .replace(/SIMULATED_FILLED/gi, "Executed (Flash Trigger Armed)");
+      .replace(/SIMULATED_FILLED/gi, "SIMULATED (demo)")
+      .replace(/SIMULATED/gi, "SIMULATED (demo)");
 
     // Clean, proper HTML format without any raw asterisks (*)
     const rawMessage = `🚨 <b>PegWatch Risk Alert: ${action.token_symbol}</b>
@@ -64,7 +69,7 @@ export class AlertNotifier {
 <b>Reasoning:</b>
 ${cleanReason}
 
-🔗 <b>Tx Hash:</b> ${explorerLink}`;
+${receiptLine}`;
 
     const message = rawMessage.replace(/\*/g, "");
 
