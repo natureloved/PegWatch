@@ -83,9 +83,9 @@ app.get("/api/actions", (req, res) => {
 });
 
 /**
- * POST /api/demo/inject-drift: Inject simulated drift for live hackathon demo
+ * POST /api/demo/inject-drift & /api/agent/inject-drift: Inject simulated drift for live hackathon demo
  */
-app.post("/api/demo/inject-drift", async (req, res) => {
+app.post(["/api/demo/inject-drift", "/api/agent/inject-drift"], async (req, res) => {
   try {
     const { driftPct, reason } = req.body;
     if (typeof driftPct !== "number") {
@@ -110,9 +110,9 @@ app.post("/api/demo/inject-drift", async (req, res) => {
 });
 
 /**
- * POST /api/demo/reset-drift: Clear simulated drift and revert to live market
+ * POST /api/demo/reset-drift & /api/agent/reset-drift: Clear simulated drift and revert to live market
  */
-app.post("/api/demo/reset-drift", async (req, res) => {
+app.post(["/api/demo/reset-drift", "/api/agent/reset-drift"], async (req, res) => {
   try {
     agent.priceFeed.resetDrift();
     agent.classifier.reset();

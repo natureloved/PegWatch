@@ -408,43 +408,43 @@ export const ExactHomepage: React.FC<ExactHomepageProps> = ({ onGoToDashboard })
               <div className="tl ok" style={{ animationDelay: '.2s' }}>
                 <span className="ts">02:59:41</span>
                 <span className="tag">[WATCH]</span>
-                <span>TSLAx peg 0.998 · inside band ±2%</span>
+                <span>NVDAc DEX $222.06 · Oracle $118.50 (Base)</span>
               </div>
               <div className="tl ok" style={{ animationDelay: '.7s' }}>
                 <span className="ts">03:00:12</span>
-                <span className="tag">[WATCH]</span>
-                <span>TSLAx peg 0.987 · inside band ±2%</span>
+                <span className="tag">[REGIME]</span>
+                <span>Market: WEEKEND_DARK_MARKET · Limit ±3.0%</span>
               </div>
               <div className="tl warn" style={{ animationDelay: '1.2s' }}>
                 <span className="ts">03:00:43</span>
                 <span className="tag">[DRIFT]</span>
-                <span>TSLAx peg 0.974 · drift −1.3% ⚠ watching</span>
+                <span>NVDAc drift +87.4% ⚠ exceeds weekend threshold</span>
               </div>
               <div className="fill-bar"><i></i></div>
               <div className="tl fire" style={{ animationDelay: '1.8s' }}>
                 <span className="ts">03:01:02</span>
                 <span className="tag">[BREACH]</span>
-                <span>peg 0.962 &lt; 0.97 floor → protective action</span>
+                <span>2 blocks confirmed → protective action via Flash</span>
               </div>
               <div className="tl" style={{ animationDelay: '2.4s' }}>
                 <span className="ts">03:01:03</span>
                 <span className="tag">[FLASH]</span>
-                <span>POST /v1/quote · stop-loss · sell 0.05 TSLAx @ 355 USDC</span>
+                <span>POST /v1/quote · stop-loss · sell 0.05 NVDAc @ 210 USDC</span>
               </div>
               <div className="tl" style={{ animationDelay: '3.0s' }}>
                 <span className="ts">03:01:04</span>
                 <span className="tag">[FLASH]</span>
-                <span>quote ok · signing EIP-712 → POST /v1/order</span>
+                <span>quoteId flash_qt_mu8854gn · signing EIP-712 session</span>
               </div>
               <div className="tl ok" style={{ animationDelay: '3.6s' }}>
                 <span className="ts">03:01:05</span>
                 <span className="tag">[FLASH]</span>
-                <span>orderId 887ccf13 · status pending_activation ✅</span>
+                <span>order status: SIMULATED_FILLED · Tx 0xe614...64ee ✅</span>
               </div>
               <div className="tl ok" style={{ animationDelay: '4.2s' }}>
                 <span className="ts">03:01:05</span>
                 <span className="tag">[TG]</span>
-                <span>→ Telegram: "🛡 TSLAx breached floor — stop placed"</span>
+                <span>→ Telegram: "🚨 PegWatch Risk Alert: NVDAc Stop Placed"</span>
               </div>
               <div className="tl ok" style={{ animationDelay: '4.8s', marginTop: 6, color: 'var(--mint)' }}>
                 <span className="ts">{timeStr}</span>
